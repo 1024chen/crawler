@@ -1,11 +1,16 @@
 package com.example.demo.crawler.util;
 
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.html.FrameWindow;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,10 +46,11 @@ class WebCrawlerUtilTest {
 
     @Test
     void getInner(){
+        //https://www.lingang.gov.cn/erroritem/2023-12-29/40780B6B-1957-EC5E-18A1-13A7C007C752.pdf?#toolbar=1&navpanes=0&scrollbar=0&view=FitH,top
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/1740428650726068226.html";
-        Document document = webCrawlerUtil.getHtmlPageResponseAsDocument(url);
-        Elements elements = document.getElementsByClass("ifo_itv_tbl")
-                .get(0).getElementsByTag("tbody");
-        System.out.println(elements);
+        FrameWindow frameWindow = webCrawlerUtil.getPage(url).getFrameByName("content");
+//        Page page = frameWindow.getEnclosedPage();
+
+        System.out.println(frameWindow);
     }
 }

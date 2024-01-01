@@ -1,16 +1,17 @@
 package com.example.demo.crawler.util;
 
+import com.gargoylesoftware.htmlunit.*;
+import com.gargoylesoftware.htmlunit.html.FrameWindow;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
-import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -63,9 +64,11 @@ public class WebCrawlerUtil {
      * 获取页面文档(等待异步JS执行)
      */
     public String getHtmlPageResponse(String url) {
-        String result = "";
+        return getPage(url).asXml();
+    }
 
-        WebClient webClient = new WebClient(BrowserVersion.CHROME);
+    public HtmlPage getPage(String url) {
+        final WebClient webClient = new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
         webClient.getOptions().setActiveXNative(false);
@@ -82,12 +85,9 @@ public class WebCrawlerUtil {
             log.error("页面获取失败{}",e.getMessage(),e);
         }
         webClient.waitForBackgroundJavaScript(waitForBackgroundJavaScript);
-
-        assert page != null;
-        result = page.asXml();
         webClient.close();
-
-        return result;
+        assert page != null;
+        return page;
     }
 
     /**
