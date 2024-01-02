@@ -33,6 +33,10 @@ public class CrawlerService {
 
     public List<CrawlerLinkBo> outCrawler(){
         Document document = webCrawlerUtil.getHtmlPageDocumentAsync(indexUrl);
+        return getCrawlerLinkBoListFromDocument(document);
+    }
+
+    private static List<CrawlerLinkBo> getCrawlerLinkBoListFromDocument(Document document) {
         Elements elements = document.getElementsByClass("pnwlst").get(0).getElementsByTag("a");
         List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
         elements.forEach(a -> {
