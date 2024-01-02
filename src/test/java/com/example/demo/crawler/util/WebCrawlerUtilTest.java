@@ -1,21 +1,24 @@
 package com.example.demo.crawler.util;
 
-import com.gargoylesoftware.htmlunit.Page;
+import com.example.demo.crawler.model.IptContent;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.html.FrameWindow;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Objects;
 
 @SpringBootTest
 class WebCrawlerUtilTest {
+    @Resource
+    private ObjectMapper objectMapper;
 
     @Resource
     private WebCrawlerUtil webCrawlerUtil;
@@ -25,7 +28,7 @@ class WebCrawlerUtilTest {
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
         webCrawlerUtil.setTimeout(30000);
         webCrawlerUtil.setWaitForBackgroundJavaScript(30000);
-        System.out.println(webCrawlerUtil.parseHtmlToDoc(webCrawlerUtil.getHtmlPageResponse(url)));
+        System.out.println(webCrawlerUtil.parseHtmlToDoc(webCrawlerUtil.getHtmlPageResponseAsync(url)));
     }
 
     @Test
@@ -33,24 +36,25 @@ class WebCrawlerUtilTest {
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
         webCrawlerUtil.setTimeout(30000);
         webCrawlerUtil.setWaitForBackgroundJavaScript(30000);
-        System.out.println(webCrawlerUtil.getHtmlPageResponse(url));
+        System.out.println(webCrawlerUtil.getHtmlPageResponseAsync(url));
     }
 
     @Test
     void getHtmlPageResponseAsDocument() {
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/1740428650726068226.html";
-        webCrawlerUtil.setTimeout(3000);
-        webCrawlerUtil.setWaitForBackgroundJavaScript(3000);
-        System.out.println(webCrawlerUtil.getHtmlPageResponseAsDocument(url));
-    }
-
-    @Test
-    void getInner(){
-        //https://www.lingang.gov.cn/erroritem/2023-12-29/40780B6B-1957-EC5E-18A1-13A7C007C752.pdf?#toolbar=1&navpanes=0&scrollbar=0&view=FitH,top
-        String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/1740428650726068226.html";
-        FrameWindow frameWindow = webCrawlerUtil.getPage(url).getFrameByName("content");
-//        Page page = frameWindow.getEnclosedPage();
-
-        System.out.println(frameWindow);
+        webCrawlerUtil.setTimeout(6000);
+        webCrawlerUtil.setWaitForBackgroundJavaScript(6000);
+        Document document = webCrawlerUtil.getHtmlPageDocumentAsync(url);
+        Element element = document.getElementById("iptContent");
+        assert element != null;
+        IptContent content;
+        try {
+            content = objectMapper.readValue(element.val(), new TypeReference<List<IptContent>>() {}).get(0);
+            content.setPath("https://www.lingang.gov.cn"+content.getPath());
+            content.setUrl(Objects.requireNonNull(document.getElementById("iptContent2")).text());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(content);
     }
 }

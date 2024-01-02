@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 @Builder
 public class InnerTbody {
+    //索取号
+    private String claimCode;
     //文件编号
     private String fileCode;
     //关键词
