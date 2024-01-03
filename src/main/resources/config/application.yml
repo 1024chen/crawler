@@ -5,3 +5,7 @@ crawler:
   proxy:
     host: 127.0.0.1
     port: 9001
+  driver:
+    chrome:
+      linux: ./chromedriver/linux/chromedriver
+      windows: chromedriver/windows/chromedriver.exe

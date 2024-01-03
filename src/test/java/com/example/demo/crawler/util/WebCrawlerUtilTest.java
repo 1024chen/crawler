@@ -10,6 +10,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
@@ -96,6 +98,18 @@ class WebCrawlerUtilTest {
         //<a href="javascript:;" title="尾页" data-page="126" class="layui-laypage-last"> 126 </a>
         //<a href="javascript:;" data-page="2" class="layui-laypage-next"> 下一页 </a>
     }
+
+    @Test
+    void getAllBySelenium(){
+        webCrawlerUtil.driverPropertySet();
+        String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
+        WebDriver driver = new ChromeDriver();
+        driver.get(url);
+        String title = driver.getTitle();
+        System.out.printf(title);
+        driver.close();
+    }
+
     @Test
     void getHtmlPageDocumentSync() {
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";

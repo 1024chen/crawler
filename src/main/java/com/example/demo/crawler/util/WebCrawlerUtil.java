@@ -33,6 +33,11 @@ public class WebCrawlerUtil {
     @Value("${crawler.proxy.port}")
     private int proxyPort;
 
+    @Value("${crawler.driver.chrome.linux}")
+    private String linuxDriver;
+    @Value("${crawler.driver.chrome.windows}")
+    private String windowsDriver;
+
     /**
      * 将网页返回为解析后的文档格式
      */
@@ -120,5 +125,15 @@ public class WebCrawlerUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void driverPropertySet(){
+        System.setProperty("webdriver.chrome.driver",isWinCurrentSystem() ? windowsDriver : linuxDriver);
+        System.setProperty("webdriver.chrome.whitelistedIps", "");
+    }
+
+    private boolean isWinCurrentSystem(){
+        return System.getProperty("os.name").toLowerCase()
+                .contains("windows");
     }
 }
