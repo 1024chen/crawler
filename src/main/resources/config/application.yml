@@ -9,3 +9,6 @@ crawler:
     chrome:
       linux: ./chromedriver/linux/chromedriver
       windows: chromedriver/windows/chromedriver.exe
+    firefox:
+      linux: ./firefoxdriver/linux/geckodriver
+      windows: ./firefoxdriver/windows/geckodriver.exe

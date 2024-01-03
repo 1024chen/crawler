@@ -34,9 +34,15 @@ public class WebCrawlerUtil {
     private int proxyPort;
 
     @Value("${crawler.driver.chrome.linux}")
-    private String linuxDriver;
+    private String chromeLinuxDriver;
     @Value("${crawler.driver.chrome.windows}")
-    private String windowsDriver;
+    private String chromeWindowsDriver;
+
+    @Value("${crawler.driver.firefox.windows}")
+    private String firefoxWindowsDriver;
+
+    @Value("${crawler.driver.firefox.linux}")
+    private String firefoxLinuxDriver;
 
     /**
      * 将网页返回为解析后的文档格式
@@ -128,8 +134,9 @@ public class WebCrawlerUtil {
     }
 
     public void driverPropertySet(){
-        System.setProperty("webdriver.chrome.driver",isWinCurrentSystem() ? windowsDriver : linuxDriver);
-        System.setProperty("webdriver.chrome.whitelistedIps", "");
+//        System.setProperty("webdriver.chrome.driver",isWinCurrentSystem() ? chromeWindowsDriver : chromeLinuxDriver);
+//        System.setProperty("webdriver.chrome.whitelistedIps", "");
+        System.setProperty("webdriver.gecko.driver",isWinCurrentSystem() ? firefoxWindowsDriver : firefoxLinuxDriver);
     }
 
     private boolean isWinCurrentSystem(){

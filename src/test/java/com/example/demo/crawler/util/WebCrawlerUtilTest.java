@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
@@ -103,7 +104,7 @@ class WebCrawlerUtilTest {
     void getAllBySelenium(){
         webCrawlerUtil.driverPropertySet();
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = new FirefoxDriver();
         driver.get(url);
         String title = driver.getTitle();
         System.out.printf(title);
