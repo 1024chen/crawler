@@ -4,17 +4,20 @@ import com.example.demo.crawler.model.IptContent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class WebCrawlerUtilTest {
@@ -60,26 +63,39 @@ class WebCrawlerUtilTest {
     }
 
     @Test
-    void getAllOutPageData() {
-        String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
-        webCrawlerUtil.setTimeout(6000);
-        webCrawlerUtil.setWaitForBackgroundJavaScript(6000);
-        Document document = webCrawlerUtil.getHtmlPageDocumentAsync(url);
-        Element element = document.getElementById("pages");
-        assert element != null;
-        Elements elements = element.getElementsByTag("a");
-        elements.forEach(System.out::println);
+    void getAllOut() throws IOException {
+        try (final WebClient webClient = webCrawlerUtil.getWebClient(false)) {
+            String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
+            // Get the first page
+            final HtmlPage page = webClient.getPage(url);
+            DomNodeList<HtmlElement> elements = page.getElementById("pages")
+                    .getFirstElementChild().getElementsByTagName("a");
 
-//        <a href="javascript:;" data-page="0" class="layui-laypage-prev layui-disabled"> 上一页 </a>
-//<a href="javascript:;" data-page="2"> 2 </a>
-//<a href="javascript:;" data-page="3"> 3 </a>
-//<a href="javascript:;" data-page="4"> 4 </a>
-//<a href="javascript:;" data-page="5"> 5 </a>
-//<a href="javascript:;" title="尾页" data-page="126" class="layui-laypage-last"> 126 </a>
-//<a href="javascript:;" data-page="2" class="layui-laypage-next"> 下一页 </a>
-//        https://www.5axxw.com/questions/simple/autyj2
+            String pre = elements.get(0).getAttribute("data-page");
+            String last = elements.get(elements.size() - 2).getAttribute("data-page");
+            HtmlElement next = elements.get(elements.size() - 1);
+
+            try {
+                HtmlPage page1 = next.click();
+                DomNodeList<HtmlElement> element = page1.getElementById("app").getElementsByTagName("div");
+                HtmlElement htmlElement = element.stream()
+                        .filter(a -> a.getAttribute("class").equals("pnwlst"))
+                        .collect(Collectors.toList()).get(0);
+                htmlElement.getFirstElementChild().getChildNodes().forEach(a -> {
+                    System.out.println(a.getTextContent());
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        //<a href="javascript:;" data-page="0" class="layui-laypage-prev layui-disabled"> 上一页 </a>
+        //<a href="javascript:;" data-page="2"> 2 </a>
+        //<a href="javascript:;" data-page="3"> 3 </a>
+        //<a href="javascript:;" data-page="4"> 4 </a>
+        //<a href="javascript:;" data-page="5"> 5 </a>
+        //<a href="javascript:;" title="尾页" data-page="126" class="layui-laypage-last"> 126 </a>
+        //<a href="javascript:;" data-page="2" class="layui-laypage-next"> 下一页 </a>
     }
-
     @Test
     void getHtmlPageDocumentSync() {
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";

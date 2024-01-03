@@ -37,8 +37,8 @@ public class WebCrawlerUtil {
      * 将网页返回为解析后的文档格式
      */
     public Document parseHtmlToDoc(String html) {
-//        return transHtmlToDocumentRemoveSpace(html);
-        return transHtmlToDocument(html);
+        return transHtmlToDocumentRemoveSpace(html);
+//        return transHtmlToDocument(html);
     }
 
     private Document transHtmlToDocumentRemoveSpace(String str) {
@@ -79,7 +79,7 @@ public class WebCrawlerUtil {
         return page;
     }
 
-    private WebClient getWebClient(boolean isProxyUsing) {
+    public WebClient getWebClient(boolean isProxyUsing) {
         final WebClient webClient = isProxyUsing ? new WebClient(BrowserVersion.CHROME,proxyHost,proxyPort)
                 : new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
