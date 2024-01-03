@@ -37,13 +37,18 @@ public class WebCrawlerUtil {
      * 将网页返回为解析后的文档格式
      */
     public Document parseHtmlToDoc(String html) {
-        return removeHtmlSpace(html);
+//        return transHtmlToDocumentRemoveSpace(html);
+        return transHtmlToDocument(html);
     }
 
-    private Document removeHtmlSpace(String str) {
+    private Document transHtmlToDocumentRemoveSpace(String str) {
         Document doc = Jsoup.parse(str);
         String result = doc.html().replace("&nbsp;", "");
         return Jsoup.parse(result);
+    }
+
+    private Document transHtmlToDocument(String str) {
+        return Jsoup.parse(str);
     }
 
     /**
