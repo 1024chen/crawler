@@ -1,6 +1,5 @@
 package com.example.demo.crawler.util;
 
-import com.example.demo.crawler.model.CrawlerLinkBo;
 import com.example.demo.crawler.model.IptContent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,10 +22,8 @@ import javax.annotation.Resource;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @SpringBootTest
 class WebCrawlerUtilTest {
@@ -41,7 +38,7 @@ class WebCrawlerUtilTest {
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
         webCrawlerUtil.setTimeout(30000);
         webCrawlerUtil.setWaitForBackgroundJavaScript(30000);
-        System.out.println(webCrawlerUtil.parseHtmlToDoc(webCrawlerUtil.getHtmlPageResponseAsync(url)));
+        Assertions.assertNotNull(webCrawlerUtil.parseHtmlToDoc(webCrawlerUtil.getHtmlPageResponseAsync(url)));
     }
 
     @Test
@@ -49,7 +46,7 @@ class WebCrawlerUtilTest {
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
         webCrawlerUtil.setTimeout(30000);
         webCrawlerUtil.setWaitForBackgroundJavaScript(30000);
-        System.out.println(webCrawlerUtil.getHtmlPageResponseAsync(url));
+        Assertions.assertNotNull(webCrawlerUtil.getHtmlPageResponseAsync(url));
     }
 
     @Test
@@ -69,49 +66,25 @@ class WebCrawlerUtilTest {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(content);
+        Assertions.assertNotNull(content);
     }
 
     @Test
-    void getAllOut() throws IOException {
+    void getWebClient() throws IOException {
         try (final WebClient webClient = webCrawlerUtil.getWebClient(false)) {
             String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
-            // Get the first page
             final HtmlPage page = webClient.getPage(url);
             DomNodeList<HtmlElement> elements = page.getElementById("pages")
                     .getFirstElementChild().getElementsByTagName("a");
-
-            String pre = elements.get(0).getAttribute("data-page");
-            String last = elements.get(elements.size() - 2).getAttribute("data-page");
-            HtmlElement next = elements.get(elements.size() - 1);
-
-            try {
-                HtmlPage page1 = next.click();
-                DomNodeList<HtmlElement> element = page1.getElementById("app").getElementsByTagName("div");
-                HtmlElement htmlElement = element.stream()
-                        .filter(a -> a.getAttribute("class").equals("pnwlst"))
-                        .collect(Collectors.toList()).get(0);
-                htmlElement.getFirstElementChild().getChildNodes().forEach(a -> {
-                    System.out.println(a.getTextContent());
-                });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            Assertions.assertTrue(elements.size() > 0);
         }
-        //<a href="javascript:;" data-page="0" class="layui-laypage-prev layui-disabled"> 上一页 </a>
-        //<a href="javascript:;" data-page="2"> 2 </a>
-        //<a href="javascript:;" data-page="3"> 3 </a>
-        //<a href="javascript:;" data-page="4"> 4 </a>
-        //<a href="javascript:;" data-page="5"> 5 </a>
-        //<a href="javascript:;" title="尾页" data-page="126" class="layui-laypage-last"> 126 </a>
-        //<a href="javascript:;" data-page="2" class="layui-laypage-next"> 下一页 </a>
     }
 
     @Test
     void firefoxDriverPropertySet() {
         webCrawlerUtil.firefoxDriverPropertySet();
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
-        WebDriver driver = new FirefoxDriver(webCrawlerUtil.getFirefoxOptions());
+        WebDriver driver = new FirefoxDriver(webCrawlerUtil.getFirefoxOptions(false));
         driver.get(url);
         String title = driver.getTitle();
         System.out.printf(title);
@@ -121,30 +94,6 @@ class WebCrawlerUtilTest {
     @Test
     void chromeDriverPropertySet() {
         webCrawlerUtil.chromeDriverPropertySet();
-        String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
-        ChromeOptions chromeOptions = webCrawlerUtil.getChromeOptions();
-        WebDriver driver = new ChromeDriver(chromeOptions);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(3));
-        driver.get(url);
-
-        WebElement nextPage = driver.findElement(By.className("layui-laypage-next"));
-        int lastIndex = Integer.parseInt(driver.findElement(By.className("layui-laypage-last"))
-                .getAttribute("data-page"));
-        List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
-        while (Integer.parseInt(nextPage.getAttribute("data-page")) <= lastIndex){
-            List<WebElement> webElementList =driver.findElement(By.className("pnwlst")).findElements(By.tagName("a"));
-            webElementList.forEach(a -> {
-                crawlerLinkBoList.add(CrawlerLinkBo.builder()
-                        .fileLink(a.getAttribute("href"))
-                        .fileTime(a.findElement(By.className("time")).getText())
-                        .fileName(a.getText().trim().substring(10)).build());
-            });
-            nextPage.click();
-            nextPage = driver.findElement(By.className("layui-laypage-next"));
-        }
-        crawlerLinkBoList.forEach(System.out::println);
-        driver.close();
     }
 
     @Test
@@ -154,33 +103,5 @@ class WebCrawlerUtilTest {
         webCrawlerUtil.setWaitForBackgroundJavaScript(6000);
         Document document = webCrawlerUtil.getHtmlPageDocumentSync(url);
         Assertions.assertNotNull(document);
-    }
-
-    public static void main(String[] args) {
-        try {
-            // 构造Shell命令
-            String command = "chmod +x /path/to/file";
-
-            // 创建ProcessBuilder对象
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.command("bash", "-c", command);
-
-            // 设置工作目录（如果需要）
-//            processBuilder.directory("/path/to/working/dir");
-
-            // 启动进程
-            Process process = processBuilder.start();
-
-            // 等待进程结束
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                System.out.println("成功执行chmod命令！");
-            } else {
-                System.err.println("执行chmod命令失败！");
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

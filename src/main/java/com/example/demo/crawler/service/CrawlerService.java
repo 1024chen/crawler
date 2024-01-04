@@ -13,8 +13,6 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,23 +35,26 @@ public class CrawlerService {
     @Value("${crawler.ling-gang-gov-cn.basePath}")
     private String basePath;
 
-    public List<CrawlerLinkBo> crawlerFirstPageWithoutBrowser(){
+    public List<CrawlerLinkBo> crawlerFirstPageWithoutBrowser() {
         Document document = webCrawlerUtil.getHtmlPageDocumentAsync(indexUrl);
         return getCrawlerLinkBoListFromDocument(document);
     }
 
-    public List<CrawlerLinkBo> outCrawlerWithBrowser() {
-        webCrawlerUtil.chromeDriverPropertySet();
-        ChromeOptions chromeOptions = webCrawlerUtil.getChromeOptions();
-        WebDriver driver = new ChromeDriver(chromeOptions);
+    public List<CrawlerLinkBo> crawlerAllPageWithBrowser(String driverName,boolean isProxyUsing) {
+        WebDriver driver = webCrawlerUtil.getDriver(driverName,isProxyUsing);
+        assert driver != null;
+        return crawlerLinkBoList(driver);
+    }
+
+    private List<CrawlerLinkBo> crawlerLinkBoList(WebDriver driver) {
+        List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(3));
         driver.get(indexUrl);
         WebElement nextPage = driver.findElement(By.className("layui-laypage-next"));
         int lastIndex = Integer.parseInt(driver.findElement(By.className("layui-laypage-last")).getAttribute("data-page"));
-        List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
-        while (Integer.parseInt(nextPage.getAttribute("data-page")) <= lastIndex){
-            List<WebElement> webElementList =driver.findElement(By.className("pnwlst")).findElements(By.tagName("a"));
+        while (Integer.parseInt(nextPage.getAttribute("data-page")) <= lastIndex) {
+            List<WebElement> webElementList = driver.findElement(By.className("pnwlst")).findElements(By.tagName("a"));
             webElementList.forEach(a -> {
                 crawlerLinkBoList.add(CrawlerLinkBo.builder()
                         .fileLink(a.getAttribute("href"))
@@ -79,20 +80,22 @@ public class CrawlerService {
         return crawlerLinkBoList;
     }
 
-    public List<InnerTbody> crawlerTBodyList(){
+    public List<InnerTbody> crawlerTBodyList() {
         List<InnerTbody> innerTbodyList = new ArrayList<>();
-        crawlerFirstPageWithoutBrowser().forEach(a -> {innerTbodyList.add(innerCrawler(a.getFileLink()));});
+        crawlerFirstPageWithoutBrowser().forEach(a -> {
+            innerTbodyList.add(innerCrawler(a.getFileLink()));
+        });
         return innerTbodyList;
     }
 
-    public InnerTbody innerCrawler(String innerUrl){
+    public InnerTbody innerCrawler(String innerUrl) {
         Document document = webCrawlerUtil.getHtmlPageDocumentAsync(innerUrl);
         InnerTbody innerTbody = getInnerTBodyFromDocument(document);
         innerTbody.setContent(getIptContentFromDocument(document).getPath());
         return innerTbody;
     }
 
-    private InnerTbody getInnerTBodyFromDocument(Document document){
+    private InnerTbody getInnerTBodyFromDocument(Document document) {
         Elements divElements = document.getElementsByClass("ifo_itv_tbl");
         Elements elements = divElements.get(0)
                 .getElementsByTag("tbody").get(0)
@@ -133,13 +136,14 @@ public class CrawlerService {
         };
     }
 
-    private IptContent getIptContentFromDocument(Document document){
+    private IptContent getIptContentFromDocument(Document document) {
         Element element = document.getElementById("iptContent");
         assert element != null;
         IptContent content;
         try {
-            content = objectMapper.readValue(element.val(), new TypeReference<List<IptContent>>() {}).get(0);
-            content.setPath(basePath+content.getPath());
+            content = objectMapper.readValue(element.val(), new TypeReference<List<IptContent>>() {
+            }).get(0);
+            content.setPath(basePath + content.getPath());
             content.setUrl(Objects.requireNonNull(document.getElementById("iptContent2")).text());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

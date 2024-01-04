@@ -36,4 +36,14 @@ class CrawlerServiceTest {
         Assertions.assertNotNull(innerTbodyList);
         innerTbodyList.forEach(System.out::println);
     }
+
+    @Test
+    void crawlerAllPageWithChrome(){
+        crawlerService.crawlerAllPageWithBrowser("chrome",false).forEach(System.out::println);
+    }
+
+    @Test
+    void crawlerAllPageWithFirefox(){
+        crawlerService.crawlerAllPageWithBrowser("firefox",false).forEach(System.out::println);
+    }
 }
