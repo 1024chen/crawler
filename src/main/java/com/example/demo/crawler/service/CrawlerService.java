@@ -10,10 +10,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,9 +37,34 @@ public class CrawlerService {
     @Value("${crawler.ling-gang-gov-cn.basePath}")
     private String basePath;
 
-    public List<CrawlerLinkBo> outCrawler(){
+    public List<CrawlerLinkBo> crawlerFirstPageWithoutBrowser(){
         Document document = webCrawlerUtil.getHtmlPageDocumentAsync(indexUrl);
         return getCrawlerLinkBoListFromDocument(document);
+    }
+
+    public List<CrawlerLinkBo> outCrawlerWithBrowser() {
+        webCrawlerUtil.chromeDriverPropertySet();
+        ChromeOptions chromeOptions = webCrawlerUtil.getChromeOptions();
+        WebDriver driver = new ChromeDriver(chromeOptions);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(3));
+        driver.get(indexUrl);
+        WebElement nextPage = driver.findElement(By.className("layui-laypage-next"));
+        int lastIndex = Integer.parseInt(driver.findElement(By.className("layui-laypage-last")).getAttribute("data-page"));
+        List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
+        while (Integer.parseInt(nextPage.getAttribute("data-page")) <= lastIndex){
+            List<WebElement> webElementList =driver.findElement(By.className("pnwlst")).findElements(By.tagName("a"));
+            webElementList.forEach(a -> {
+                crawlerLinkBoList.add(CrawlerLinkBo.builder()
+                        .fileLink(a.getAttribute("href"))
+                        .fileTime(a.findElement(By.className("time")).getText())
+                        .fileName(a.getText().trim().substring(10)).build());
+            });
+            nextPage.click();
+            nextPage = driver.findElement(By.className("layui-laypage-next"));
+        }
+        driver.close();
+        return crawlerLinkBoList;
     }
 
     private static List<CrawlerLinkBo> getCrawlerLinkBoListFromDocument(Document document) {
@@ -50,7 +81,7 @@ public class CrawlerService {
 
     public List<InnerTbody> crawlerTBodyList(){
         List<InnerTbody> innerTbodyList = new ArrayList<>();
-        outCrawler().forEach(a -> {innerTbodyList.add(innerCrawler(a.getFileLink()));});
+        crawlerFirstPageWithoutBrowser().forEach(a -> {innerTbodyList.add(innerCrawler(a.getFileLink()));});
         return innerTbodyList;
     }
 

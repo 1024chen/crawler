@@ -17,7 +17,7 @@ class CrawlerServiceTest {
 
     @Test
     void outCrawler() {
-        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.outCrawler();
+        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstPageWithoutBrowser();
         Assertions.assertNotNull(crawlerLinkBoList);
         System.out.println(crawlerLinkBoList);
     }

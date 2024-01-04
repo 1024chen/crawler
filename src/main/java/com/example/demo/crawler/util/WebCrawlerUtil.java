@@ -8,6 +8,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -133,11 +135,40 @@ public class WebCrawlerUtil {
         }
     }
 
-    public void driverPropertySet(){
-//        System.setProperty("webdriver.chrome.driver",isWinCurrentSystem() ? chromeWindowsDriver : chromeLinuxDriver);
-//        System.setProperty("webdriver.chrome.whitelistedIps", "");
+    public void firefoxDriverPropertySet(){
         System.setProperty("webdriver.gecko.driver",isWinCurrentSystem() ? firefoxWindowsDriver : firefoxLinuxDriver);
+//        if (!isWinCurrentSystem()){
+//            System.setProperty("webdriver.firefox.bin", "/usr/bin/firefox");
+//        }
     }
+
+    public void chromeDriverPropertySet(){
+        System.setProperty("webdriver.chrome.driver",isWinCurrentSystem() ? chromeWindowsDriver : chromeLinuxDriver);
+        System.setProperty("webdriver.chrome.whitelistedIps", "");
+    }
+
+    public ChromeOptions getChromeOptions() {
+        ChromeOptions chromeOptions = new ChromeOptions();
+        //设置为 headless 模式 （必须）
+//        if (!isWinCurrentSystem()){
+//            chromeOptions.addArguments("--headless");
+            chromeOptions.addArguments("--disable-gpu");
+            chromeOptions.addArguments("--no-sandbox");
+            chromeOptions.addArguments("--disable-dev-shm-usage");
+            chromeOptions.addArguments("lang=zh_CN.UTF-8");
+            chromeOptions.addArguments("window-size=1920x1080");
+//        }
+        chromeOptions.addArguments("--remote-allow-origins=*");
+        return chromeOptions;
+    }
+
+    public FirefoxOptions getFirefoxOptions() {
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
+        firefoxOptions.addArguments("--headless");
+        firefoxOptions.addArguments("--disable-gpu");
+        return firefoxOptions;
+    }
+
 
     private boolean isWinCurrentSystem(){
         return System.getProperty("os.name").toLowerCase()

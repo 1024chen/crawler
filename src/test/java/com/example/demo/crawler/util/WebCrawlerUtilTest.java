@@ -1,5 +1,6 @@
 package com.example.demo.crawler.util;
 
+import com.example.demo.crawler.model.CrawlerLinkBo;
 import com.example.demo.crawler.model.IptContent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -10,14 +11,19 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,8 +62,9 @@ class WebCrawlerUtilTest {
         assert element != null;
         IptContent content;
         try {
-            content = objectMapper.readValue(element.val(), new TypeReference<List<IptContent>>() {}).get(0);
-            content.setPath("https://www.lingang.gov.cn"+content.getPath());
+            content = objectMapper.readValue(element.val(), new TypeReference<List<IptContent>>() {
+            }).get(0);
+            content.setPath("https://www.lingang.gov.cn" + content.getPath());
             content.setUrl(Objects.requireNonNull(document.getElementById("iptContent2")).text());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -101,13 +108,42 @@ class WebCrawlerUtilTest {
     }
 
     @Test
-    void getAllBySelenium(){
-        webCrawlerUtil.driverPropertySet();
+    void firefoxDriverPropertySet() {
+        webCrawlerUtil.firefoxDriverPropertySet();
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
-        WebDriver driver = new FirefoxDriver();
+        WebDriver driver = new FirefoxDriver(webCrawlerUtil.getFirefoxOptions());
         driver.get(url);
         String title = driver.getTitle();
         System.out.printf(title);
+        driver.close();
+    }
+
+    @Test
+    void chromeDriverPropertySet() {
+        webCrawlerUtil.chromeDriverPropertySet();
+        String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
+        ChromeOptions chromeOptions = webCrawlerUtil.getChromeOptions();
+        WebDriver driver = new ChromeDriver(chromeOptions);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(3));
+        driver.get(url);
+
+        WebElement nextPage = driver.findElement(By.className("layui-laypage-next"));
+        int lastIndex = Integer.parseInt(driver.findElement(By.className("layui-laypage-last"))
+                .getAttribute("data-page"));
+        List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
+        while (Integer.parseInt(nextPage.getAttribute("data-page")) <= lastIndex){
+            List<WebElement> webElementList =driver.findElement(By.className("pnwlst")).findElements(By.tagName("a"));
+            webElementList.forEach(a -> {
+                crawlerLinkBoList.add(CrawlerLinkBo.builder()
+                        .fileLink(a.getAttribute("href"))
+                        .fileTime(a.findElement(By.className("time")).getText())
+                        .fileName(a.getText().trim().substring(10)).build());
+            });
+            nextPage.click();
+            nextPage = driver.findElement(By.className("layui-laypage-next"));
+        }
+        crawlerLinkBoList.forEach(System.out::println);
         driver.close();
     }
 
@@ -118,5 +154,33 @@ class WebCrawlerUtilTest {
         webCrawlerUtil.setWaitForBackgroundJavaScript(6000);
         Document document = webCrawlerUtil.getHtmlPageDocumentSync(url);
         Assertions.assertNotNull(document);
+    }
+
+    public static void main(String[] args) {
+        try {
+            // 构造Shell命令
+            String command = "chmod +x /path/to/file";
+
+            // 创建ProcessBuilder对象
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.command("bash", "-c", command);
+
+            // 设置工作目录（如果需要）
+//            processBuilder.directory("/path/to/working/dir");
+
+            // 启动进程
+            Process process = processBuilder.start();
+
+            // 等待进程结束
+            int exitCode = process.waitFor();
+
+            if (exitCode == 0) {
+                System.out.println("成功执行chmod命令！");
+            } else {
+                System.err.println("执行chmod命令失败！");
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
