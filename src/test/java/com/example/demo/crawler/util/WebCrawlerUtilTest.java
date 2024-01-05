@@ -10,18 +10,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -76,7 +71,7 @@ class WebCrawlerUtilTest {
             final HtmlPage page = webClient.getPage(url);
             DomNodeList<HtmlElement> elements = page.getElementById("pages")
                     .getFirstElementChild().getElementsByTagName("a");
-            Assertions.assertTrue(elements.size() > 0);
+            Assertions.assertFalse(elements.isEmpty());
         }
     }
 
