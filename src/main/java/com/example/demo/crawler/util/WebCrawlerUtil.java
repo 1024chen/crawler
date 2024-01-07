@@ -8,16 +8,21 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 @Setter
 @Getter
@@ -157,7 +162,7 @@ public class WebCrawlerUtil {
         } else if (driver.equals("firefox")) {
             return getFirefoxDriver(isProxyUsing);
         } else {
-            return null;
+            return getRemoteDriver();
         }
     }
 
@@ -169,6 +174,19 @@ public class WebCrawlerUtil {
     private WebDriver getChromeDriver(boolean isProxyUsing) {
         chromeDriverPropertySet();
         return new ChromeDriver(getChromeOptions(isProxyUsing));
+    }
+
+    private WebDriver getRemoteDriver(){
+//        chromeDriverPropertySet();
+        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        desiredCapabilities.setBrowserName("chrome");
+        desiredCapabilities.setPlatform(Platform.LINUX);
+        URI uri = URI.create("http://host:4444/wd/hub");
+        try {
+            return new RemoteWebDriver(uri.toURL(),desiredCapabilities);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

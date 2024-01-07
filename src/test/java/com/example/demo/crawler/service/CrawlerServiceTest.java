@@ -46,4 +46,9 @@ class CrawlerServiceTest {
     void crawlerAllPageWithFirefox(){
         crawlerService.crawlerAllPageWithBrowser("firefox",false).forEach(System.out::println);
     }
+
+    @Test
+    void crawlerAllPageWithRemote(){
+        crawlerService.crawlerAllPageWithBrowser("remote",false).forEach(System.out::println);
+    }
 }
