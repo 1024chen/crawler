@@ -51,4 +51,14 @@ class CrawlerServiceTest {
     void crawlerAllPageWithRemote(){
         crawlerService.crawlerAllPageWithBrowser("remote",false).forEach(System.out::println);
     }
+
+    @Test
+    void crawlerAllWeiXinTitle(){
+        System.out.println(crawlerService.crawlerAllWeiXinTitle(false));
+    }
+
+    @Test
+    void crawlerAllWithHttpPage(){
+        System.out.println(crawlerService.crawlerAllWithHttpPage());
+    }
 }
