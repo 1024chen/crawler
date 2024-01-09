@@ -2,6 +2,7 @@ package com.example.demo.crawler.service;
 
 import com.example.demo.crawler.model.CrawlerLinkBo;
 import com.example.demo.crawler.model.InnerTbody;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,8 +17,29 @@ class CrawlerServiceTest {
     private CrawlerService crawlerService;
 
     @Test
-    void outCrawler() {
+    void crawlerFirstPageWithoutBrowser() {
         List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstPageWithoutBrowser();
+        Assertions.assertNotNull(crawlerLinkBoList);
+        System.out.println(crawlerLinkBoList);
+    }
+
+    @Test
+    void crawlerFirstGovFilesWithHttpString() throws JsonProcessingException {
+        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstGovFilesWithHttpString(false);
+        Assertions.assertNotNull(crawlerLinkBoList);
+        System.out.println(crawlerLinkBoList);
+    }
+
+    @Test
+    void crawlerAllMediaFocusSync(){
+        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerAllMediaFocusSync();
+        Assertions.assertNotNull(crawlerLinkBoList);
+        System.out.println(crawlerLinkBoList);
+    }
+
+    @Test
+    void crawlerFistMediaFocusSync(){
+        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFistMediaFocusSync();
         Assertions.assertNotNull(crawlerLinkBoList);
         System.out.println(crawlerLinkBoList);
     }
@@ -53,17 +75,22 @@ class CrawlerServiceTest {
     }
 
     @Test
-    void crawlerAllWeiXinTitle(){
-        System.out.println(crawlerService.crawlerAllWeiXinTitle(false));
+    void crawler30WeiXinSpecialCase(){
+        System.out.println(crawlerService.crawler30WeiXinSpecialCase(false));
     }
 
     @Test
-    void crawlerAllWithHttpPage(){
-        System.out.println(crawlerService.crawlerAllWithHttpPage());
+    void crawler30WeiXinAlliance(){
+        System.out.println(crawlerService.crawler30WeiXinAlliance(false));
     }
 
     @Test
-    void crawlerAllWithHttpString(){
-        System.out.println(crawlerService.crawlerAllWithHttpString(false));
+    void crawlerAllGovFilesWithHttpPage() throws JsonProcessingException {
+        System.out.println(crawlerService.crawlerAllGovFilesWithHttpPage());
+    }
+
+    @Test
+    void crawlerAllGovFilesWithHttpString() throws JsonProcessingException {
+        System.out.println(crawlerService.crawlerAllGovFilesWithHttpString(false));
     }
 }

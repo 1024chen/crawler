@@ -74,18 +74,55 @@ public class HttpCrawlerUtil {
                 .build();
     }
 
-    public String mpWeiXinCrawler(boolean isProxyUsing) {
+    /**
+     * 特色案例爬取
+     */
+    public String mpWeiXinSpecialCaseCrawler(boolean isProxyUsing) {
         OkHttpClient client = getClient(isProxyUsing);
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
-        Request request = getWeiXinRequest(body);
+        Request request = getWeiXinSpecialCaseRequest(body);
+        return getResponseString(client, request);
+    }
+
+    /**
+     * 联盟动态爬取
+     */
+    public String mpWeiXinAllianceCrawler(boolean isProxyUsing){
+        OkHttpClient client = getClient(isProxyUsing);
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "");
+        Request request = getWeiXinAllianceRequest(body);
         return getResponseString(client, request);
     }
 
     @NotNull
-    private static Request getWeiXinRequest(RequestBody body) {
+    private static Request getWeiXinAllianceRequest(RequestBody body){
         return new Request.Builder()
-                .url("https://mp.weixin.qq.com/mp/homepage?__biz=Mzg2MjU1NDE2MA==&hid=1&sn=3cbde566fe84879605db9a465fc21ed1&scene=1&uin=MjAyODQxNzA4MA==&key=1aeb31bef52afc46c0eef3dfc19cfe3a93e7c27bba2c2bfdbf4ca15cb79dc8591f39dfabdcf99e660260e16cd2b4f0dfa651d0374eed3d2eb2707bb4bdc61dd52ad661a6f8ec6f9572316f1d27908cee5ff91cc770adc029e193fca01170aa2c54b46367867297ce137f3f9f9ade2b052ed5a9b617ab2751a8aa202597eb697c&devicetype=android-33&version=28002c51&lang=zh_CN&ascene=1&session_us=gh_d4f0feda48c3&pass_ticket=g3NCO9nHt+wKRTEKuYNPqfrK7WvB1Gsarz0/3PfJYKcbAsbxzJFtEs0sL1rEr27BQa4xD8AlbGAMOVzaCLHrtQ==&wx_header=3&from=groupmessage&nettype=ctnet&begin=0&count=100&action=appmsg_list&f=json&r=0.9606280061739596&appmsg_token=")
+                .url("https://mp.weixin.qq.com/mp/homepage?__biz=Mzg2MjU1NDE2MA==&hid=8&sn=aa9785958170e807f2449c4bf8e2df44&scene=18&uin=&key=&devicetype=Windows 10 x64&version=63090819&lang=zh_CN&ascene=0&begin=0&count=30&action=appmsg_list&f=json&r=0.9853306790351559&appmsg_token=")
+                .method("POST", body)
+                .addHeader("Host", " mp.weixin.qq.com")
+                .addHeader("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0")
+                .addHeader("Accept", " application/json")
+                .addHeader("Accept-Language", " zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2")
+//                .addHeader("Accept-Encoding", " gzip, deflate, br")
+                .addHeader("X-Requested-With", " XMLHttpRequest")
+                .addHeader("Origin", " https://mp.weixin.qq.com")
+                .addHeader("Connection", " keep-alive")
+                .addHeader("Referer", " https://mp.weixin.qq.com/mp/homepage?__biz=Mzg2MjU1NDE2MA==&hid=8&sn=aa9785958170e807f2449c4bf8e2df44&scene=18&uin=&key=&devicetype=Windows+10+x64&version=63090819&lang=zh_CN&ascene=0")
+//                .addHeader("Cookie", " RK=8iER79/IdG; ptcz=0a317de749be377e39a2be9cfb66e07158cf344c5c33d50054546a667bbedc29; pgv_pvid=3563990808; pac_uid=0_fa0eea6dc6976; iip=0; Qs_lvt_323937=1691227803; Qs_pv_323937=3462242744228334000; rewardsn=; wxtokenkey=777")
+                .addHeader("Sec-Fetch-Dest", " empty")
+                .addHeader("Sec-Fetch-Mode", " cors")
+                .addHeader("Sec-Fetch-Site", " same-origin")
+                .addHeader("Content-Length", " 0")
+                .addHeader("TE", " trailers")
+                .build();
+    }
+
+    @NotNull
+    private static Request getWeiXinSpecialCaseRequest(RequestBody body) {
+        return new Request.Builder()
+                .url("https://mp.weixin.qq.com/mp/homepage?__biz=Mzg2MjU1NDE2MA==&hid=1&sn=3cbde566fe84879605db9a465fc21ed1&scene=1&uin=MjAyODQxNzA4MA==&key=1aeb31bef52afc46c0eef3dfc19cfe3a93e7c27bba2c2bfdbf4ca15cb79dc8591f39dfabdcf99e660260e16cd2b4f0dfa651d0374eed3d2eb2707bb4bdc61dd52ad661a6f8ec6f9572316f1d27908cee5ff91cc770adc029e193fca01170aa2c54b46367867297ce137f3f9f9ade2b052ed5a9b617ab2751a8aa202597eb697c&devicetype=android-33&version=28002c51&lang=zh_CN&ascene=1&session_us=gh_d4f0feda48c3&pass_ticket=g3NCO9nHt+wKRTEKuYNPqfrK7WvB1Gsarz0/3PfJYKcbAsbxzJFtEs0sL1rEr27BQa4xD8AlbGAMOVzaCLHrtQ==&wx_header=3&from=groupmessage&nettype=ctnet&begin=0&count=30&action=appmsg_list&f=json&r=0.9606280061739596&appmsg_token=")
                 .method("POST", body)
                 .addHeader("Host", " mp.weixin.qq.com")
                 .addHeader("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0")

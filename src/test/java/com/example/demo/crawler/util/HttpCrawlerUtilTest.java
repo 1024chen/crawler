@@ -5,8 +5,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 class HttpCrawlerUtilTest {
     @Resource
@@ -20,8 +18,14 @@ class HttpCrawlerUtilTest {
     }
 
     @Test
-    void mpWeiXinCrawler() {
-        String res = httpCrawlerUtil.mpWeiXinCrawler(false);
+    void mpWeiXinSpecialCaseCrawler() {
+        String res = httpCrawlerUtil.mpWeiXinSpecialCaseCrawler(false);
+        System.out.println(res);
+    }
+
+    @Test
+    void mpWeiXinAllianceCrawler(){
+        String res = httpCrawlerUtil.mpWeiXinAllianceCrawler(false);
         System.out.println(res);
     }
 }

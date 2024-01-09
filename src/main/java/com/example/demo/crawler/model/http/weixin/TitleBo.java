@@ -9,4 +9,5 @@ public class TitleBo {
     private String title;
     private String cover;
     private String link;
+    private String time;
 }

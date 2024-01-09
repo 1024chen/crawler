@@ -21,5 +21,5 @@ public class AppMsg {
     private int copyrightStat;
     private String author;
     @JsonProperty("sendtime")
-    private int sendTime;
+    private long sendTime;
 }
