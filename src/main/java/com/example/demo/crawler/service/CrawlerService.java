@@ -11,6 +11,7 @@ import com.example.demo.crawler.util.WebCrawlerUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -44,7 +45,7 @@ public class CrawlerService {
      */
     public List<TitleBo> crawlerAllWeiXinTitle(boolean isProxyUsing) {
         List<TitleBo> titleBoList = new ArrayList<>();
-        String response = httpCrawlerUtil.mpWeiXinCrawler(false);
+        String response = httpCrawlerUtil.mpWeiXinCrawler(isProxyUsing);
         WeiXinReceiveBo weiXinReceiveBo;
         try {
             weiXinReceiveBo = objectMapper.readValue(response, new TypeReference<WeiXinReceiveBo>() {
@@ -92,41 +93,49 @@ public class CrawlerService {
                     linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(a.getTIME().substring(0, 10)).fileLink(a.getContent()).build());
                 });
             }
-            ;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
         return linkBoList;
     }
 
-    public List<CrawlerLinkBo> crawlerAllWithHttpString() {
+    public List<CrawlerLinkBo> crawlerAllWithHttpString(boolean isProxyUsing) {
         String[] reString = {"{\"pageSize\":90,\"pageNumber\":", ",\"columns\":[\"id\",\"content_title\",\"content_datetime\",\"content_hit\",\"time\",\"file_url\",\"content\",\"public_type\",\"info_name\",\"words\",\"file_code\",\"sq_code\",\"manuscripts\",\"del\"],\"tableName\":\"view_zhengcewenjian\",\"orSql\":\"\",\"orderBy\":\"content_datetime desc\",\"betweenMap\":[{\"begin\":\"2019-01-01\",\"end\":\"2100-01-01\",\"column\":\"content_datetime\"}],\"inMap\":{},\"eqMap\":{\"del\":0,\"content_display\":0},\"likeMap\":[],\"map\":{},\"file_code like\":[]}"};
         int pageNumber = 1;
         List<CrawlerLinkBo> linkBoList = new ArrayList<>();
-        RequestBo requestBo = getRequestBo();
         String jsonBody = reString[0] + pageNumber + reString[1];
-        String response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
+        String response = httpCrawlerUtil.linGangPageCrawler(jsonBody, isProxyUsing);
         LinGangReceiveBo receiveBo;
         try {
             receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
             });
-            receiveBo.getData().getList().forEach(a -> {
-                linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(a.getTIME().substring(0, 10)).fileLink(a.getContent()).build());
-            });
+            receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
             while (receiveBo.getData().isHasNextPage()) {
                 pageNumber += 1;
                 jsonBody = reString[0] + pageNumber + reString[1];
                 response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
                 receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
                 });
-                receiveBo.getData().getList().forEach(a -> {
-                    linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(a.getTIME().substring(0, 10)).fileLink(a.getContent()).build());
-                });
+                receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
         return linkBoList;
+    }
+
+    @NotNull
+    private Consumer<ContentData> getContentDataConsumer(List<CrawlerLinkBo> linkBoList) {
+        return a -> {
+            if (a.getDel().equals("0")) {
+                linkBoList.add(CrawlerLinkBo.builder()
+                        .fileName(a.getContent_title())
+                        .fileTime(a.getTIME() != null ? a.getTIME().substring(0, 10) : "")
+                        .fileLink(a.getContent() != null ?
+                                readIpContentFromString(a.getContent().substring(1, a.getContent().length() - 1)).getPath()
+                                : "").build());
+            }
+        };
     }
 
     private RequestBo getRequestBo() {
@@ -258,5 +267,17 @@ public class CrawlerService {
             throw new RuntimeException(e);
         }
         return content;
+    }
+
+    private IptContent readIpContentFromString(String content) {
+        IptContent result;
+        try {
+            result = objectMapper.readValue(content, new TypeReference<IptContent>() {
+            });
+            result.setPath(basePath + result.getPath());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 }

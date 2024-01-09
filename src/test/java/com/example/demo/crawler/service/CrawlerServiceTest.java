@@ -64,6 +64,6 @@ class CrawlerServiceTest {
 
     @Test
     void crawlerAllWithHttpString(){
-        System.out.println(crawlerService.crawlerAllWithHttpString());
+        System.out.println(crawlerService.crawlerAllWithHttpString(false));
     }
 }
