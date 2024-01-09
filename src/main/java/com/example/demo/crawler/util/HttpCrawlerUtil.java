@@ -27,10 +27,10 @@ public class HttpCrawlerUtil {
                 : new OkHttpClient().newBuilder().build();
     }
 
-    public String linGangPageCrawler(String jsonBody,boolean isProxyUsing) {
+    public String linGangPageCrawler(String jsonBody, boolean isProxyUsing) {
         OkHttpClient client = getClient(isProxyUsing);
         MediaType mediaType = MediaType.parse(" application/json;charset=UTF-8");
-        RequestBody body = RequestBody.create(mediaType,jsonBody);
+        RequestBody body = RequestBody.create(mediaType, jsonBody);
         Request request = getLinGangPageRequest(body);
         return getResponseString(client, request);
     }
@@ -41,13 +41,13 @@ public class HttpCrawlerUtil {
         try {
             response = client.newCall(request).execute();
         } catch (IOException e) {
-            log.error("请求失败:{}",e.getMessage(),e);
+            log.error("请求失败:{}", e.getMessage(), e);
         }
         assert Objects.requireNonNull(response).body() != null;
         try {
             return response.body().string();
         } catch (IOException e) {
-            log.error("获取请求体失败:{}",e.getMessage(),e);
+            log.error("获取请求体失败:{}", e.getMessage(), e);
         }
         return "";
     }
