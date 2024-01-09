@@ -50,7 +50,7 @@ public class CrawlerService {
         try {
             weiXinReceiveBo = objectMapper.readValue(response, new TypeReference<WeiXinReceiveBo>() {
             });
-            weiXinReceiveBo.getAppmsg_list().forEach(a -> {
+            weiXinReceiveBo.getAppMsgList().forEach(a -> {
                 titleBoList.add(TitleBo.builder().title(a.getTitle()).link(a.getLink()).cover(a.getCover()).build());
             });
         } catch (JsonProcessingException e) {

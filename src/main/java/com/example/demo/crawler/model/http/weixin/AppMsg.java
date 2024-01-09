@@ -1,6 +1,6 @@
 package com.example.demo.crawler.model.http.weixin;
 
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -10,11 +10,16 @@ public class AppMsg {
     private String cover;
     private String link;
     private String digest;
-    private String appmsgid;
-    private String itemidx;
+    @JsonProperty("appmsgid")
+    private String appMsgId;
+    @JsonProperty("itemidx")
+    private String itemIdx;
     private String type;
-    private int item_show_type;
-    private int copyright_stat;
+    @JsonProperty("item_show_type")
+    private int itemShowType;
+    @JsonProperty("copyright_stat")
+    private int copyrightStat;
     private String author;
-    private int sendtime;
+    @JsonProperty("sendtime")
+    private int sendTime;
 }
