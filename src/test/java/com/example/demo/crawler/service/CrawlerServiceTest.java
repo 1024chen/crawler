@@ -61,4 +61,9 @@ class CrawlerServiceTest {
     void crawlerAllWithHttpPage(){
         System.out.println(crawlerService.crawlerAllWithHttpPage());
     }
+
+    @Test
+    void crawlerAllWithHttpString(){
+        System.out.println(crawlerService.crawlerAllWithHttpString());
+    }
 }
