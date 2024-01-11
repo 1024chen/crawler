@@ -1,3 +1,17 @@
+lowCode:
+  tenantId: BW61
+
+
+news:
+  type:
+    newsId: BW6711
+    policyId: BW6710
+    specialId: BW6763
+  status:
+    publishedId: BW5585
+    unpublishedId: BW5586
+  isExternalId: BW6832
+
 crawler:
   ling-gang-gov-cn:
     basePath: https://www.lingang.gov.cn
