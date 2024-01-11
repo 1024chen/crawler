@@ -1,6 +1,13 @@
 lowCode:
   tenantId: BW61
 
+photo:
+  url: ./static/img
+
+gateway:
+  accessKey: key
+  secretKey: sec
+  url: url
 
 news:
   type:
@@ -12,7 +19,9 @@ news:
     unpublishedId: BW5586
   isExternalId: BW6832
 
+#第一次生产之后isInit后续应改为false
 crawler:
+  isInit: true
   ling-gang-gov-cn:
     basePath: https://www.lingang.gov.cn
     index: https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html
