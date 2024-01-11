@@ -113,7 +113,7 @@ public class CrawlerService {
         LinGangReceiveBo receiveBo;
         receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
         });
-        receiveBo.getData().getList().forEach(a -> linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(a.getTIME().substring(0, 10)).fileLink(a.getContent()).build()));
+        receiveBo.getData().getList().forEach(a -> linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(transFullTime(a.getTIME())).fileLink(a.getContent()).build()));
         while (receiveBo.getData().isHasNextPage()) {
             requestBo.setPageNumber(requestBo.getPageNumber() + 1);
             try {
@@ -124,7 +124,7 @@ public class CrawlerService {
             response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
             receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
             });
-            receiveBo.getData().getList().forEach(a -> linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(a.getTIME().substring(0, 10)).fileLink(a.getContent()).build()));
+            receiveBo.getData().getList().forEach(a -> linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(transFullTime(a.getTIME())).fileLink(a.getContent()).build()));
         }
         return linkBoList;
     }
@@ -173,7 +173,7 @@ public class CrawlerService {
             if (a.getDel().equals("0")) {
                 linkBoList.add(CrawlerLinkBo.builder()
                         .fileName(a.getContent_title())
-                        .fileTime(a.getTIME() != null ? a.getTIME().substring(0, 10) : "")
+                        .fileTime(transFullTime(a.getTIME()))
                         .fileLink(a.getContent() != null ?
                                 readIpContentFromString(a.getContent().substring(1, a.getContent().length() - 1)).getPath()
                                 : "").build());
@@ -218,7 +218,7 @@ public class CrawlerService {
             List<WebElement> webElementList = driver.findElement(By.className("pnwlst")).findElements(By.tagName("a"));
             webElementList.forEach(a -> crawlerLinkBoList.add(CrawlerLinkBo.builder()
                     .fileLink(a.getAttribute("href"))
-                    .fileTime(a.findElement(By.className("time")).getText())
+                    .fileTime(transFullTime(a.findElement(By.className("time")).getText()))
                     .fileName(a.getText().trim().substring(10)).build()));
             nextPage.click();
             nextPage = driver.findElement(By.className("layui-laypage-next"));
@@ -232,7 +232,7 @@ public class CrawlerService {
         List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
         elements.forEach(a -> crawlerLinkBoList.add(CrawlerLinkBo.builder()
                 .fileLink(a.attr("href"))
-                .fileTime(a.getElementsByClass("time").get(0).text())
+                .fileTime(transFullTime(a.getElementsByClass("time").get(0).text()))
                 .fileName(a.text().split(" ")[1]).build()));
         return crawlerLinkBoList;
     }
@@ -320,6 +320,24 @@ public class CrawlerService {
 
     private String transTimeMillisToString(long sendTime) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return simpleDateFormat.format(new Date(sendTime));
+        return simpleDateFormat.format(new Date(sendTime * 1000L));
+    }
+
+    /**
+     * 2023-12-18
+     * 2023-08-28 20:36:49
+     */
+    private static String transFullTime(String time) {
+        if (time == null || time.isEmpty()){
+            return time;
+        }
+        String tm = time.trim();
+        if (tm.length() == 10){
+            return tm + " 00:00:00";
+        }
+        if (tm.length() > 19){
+            return tm.substring(0,19);
+        }
+        return tm;
     }
 }

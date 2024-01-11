@@ -23,6 +23,9 @@ class CrawlerServiceTest {
         System.out.println(crawlerLinkBoList);
     }
 
+    /**
+     * fileTime=2024-01-08
+     */
     @Test
     void crawlerFirstGovFilesWithHttpString() throws JsonProcessingException {
         List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstGovFilesWithHttpString(false);
@@ -30,6 +33,9 @@ class CrawlerServiceTest {
         System.out.println(crawlerLinkBoList);
     }
 
+    /**
+     * fileTime=2023-12-18
+     */
     @Test
     void crawlerAllMediaFocusSync(){
         List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerAllMediaFocusSync();
@@ -79,6 +85,12 @@ class CrawlerServiceTest {
         System.out.println(crawlerService.crawler30WeiXinSpecialCase(false));
     }
 
+    /**
+     * TitleBo(title=联盟早餐会｜聚焦生物医药企业，临港新片区科技金融联盟早餐会第二期如约而至,
+     * cover=http://mmbiz.qpic.cn/sz_mmbiz_jpg/Ege2ibuzgpmg2Om68FibLvnX35ic0leR9q8nKIqAf49LZfGDEEHmKLiak7Yvoc8ohchOEnvp2C1sab3icmJl6auA2SA/0,
+     * link=http://mp.weixin.qq.com/s?__biz=Mzg2MjU1NDE2MA==&mid=2247508462&idx=1&sn=543d6578c2f921883f30677517fa256e&scene=19#wechat_redirect,
+     * time=2023-08-28 20:36:49),
+     */
     @Test
     void crawler30WeiXinAlliance(){
         System.out.println(crawlerService.crawler30WeiXinAlliance(false));
