@@ -1,6 +1,8 @@
 package com.example.crawler.task;
 
+import com.example.crawler.service.CrawlerService;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,6 +13,9 @@ import org.springframework.stereotype.Component;
 public class CrawlerTask {
     @Value("${crawler.isInit}")
     private boolean isInit;
+
+    @Resource
+    private CrawlerService crawlerService;
 
     /**
      * 每天23点

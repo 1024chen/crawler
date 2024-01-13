@@ -29,5 +29,23 @@ public class NewsResponse {
     private String newsSrcAnnTime;
     private String isDeleted;
     @JsonProperty("s_NEWS_QNTNT")
-    private String newscontent;0个用法@JsonProperty("s_POLCX_SRC_ANNC-TME"）private String policySrcAnnTime;0个用法@JsonProperty("s_SPCLZ-CASE ANNCTME")private String specialcaseAnnTime;0个用法private String tenantId;0个用法private String name;0个用法private String createdTime;0个用法@JsonProperty("s_SRCLZ_CASE_TITLE")private String specialCaseTitle;0个用法private String id;0个用法private String enterpriseId;信息登记薄状态/0个用法@JsonProperty("s_INF_RGSN-B0OK_STS")private EnumInnerBo 1nfoReBookStatus;0个用法private String responsibleuserId;0个用法@JsonProperty("s_NEWS_TP")private EnumInnerBo newsType;0个用法@JsonProperty("NEWS_URL")private String newsurl;I
+    private String newsContent;
+    @JsonProperty("s_POLCY_SRC_ANNC_TME")
+    private String policySrcAnnTime;
+    @JsonProperty("s_SPCLZ_CASE_ANN_TME")
+    private String specialCaseAnnTime;
+    private String tenantId;
+    private String name;
+    private String createdTime;
+    @JsonProperty("s_SPCLZ_CASE_TITLE")
+    private String specialCaseTitle;
+    private String id;
+    private String enterpriseId;
+    @JsonProperty("s_INF_RGSN_B0OK_STS")
+    private EnumInnerBo infoReBookStatus;
+    private String responsibleUserId;
+    @JsonProperty("s_NEWS_TP")
+    private EnumInnerBo newsType;
+    @JsonProperty("NEWS_URL")
+    private String newsUrl;
 }

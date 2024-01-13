@@ -18,8 +18,38 @@ class CrawlerServiceTest {
     private CrawlerService crawlerService;
 
     @Test
+    void getSpecialCase(){
+        System.out.println(crawlerService.getSpecialCase());
+    }
+
+    @Test
+    void getAlliance(){
+        System.out.println(crawlerService.getAlliance());
+    }
+
+    @Test
+    void getAllGovFiles(){
+        System.out.println(crawlerService.getAllGovFiles());
+    }
+
+    @Test
+    void getSomeGovFiles(){
+        System.out.println(crawlerService.getSomeGovFiles());
+    }
+
+    @Test
+    void getAllMediaFocus(){
+        System.out.println(crawlerService.getAllMediaFocus());
+    }
+
+    @Test
+    void getSomeMediaFocus(){
+        System.out.println(crawlerService.getSomeMediaFocus());
+    }
+
+    @Test
     void crawlerFirstPageWithoutBrowser() {
-        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstPageWithoutBrowser();
+        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstGovFilesPageWithoutBrowser();
         Assertions.assertNotNull(crawlerLinkBoList);
         System.out.println(crawlerLinkBoList);
     }
@@ -46,7 +76,7 @@ class CrawlerServiceTest {
 
     @Test
     void crawlerFistMediaFocusSync(){
-        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFistMediaFocusSync();
+        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstMediaFocusSync();
         Assertions.assertNotNull(crawlerLinkBoList);
         System.out.println(crawlerLinkBoList);
     }

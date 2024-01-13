@@ -1,6 +1,8 @@
 package com.example.crawler.model.http.lingang;
 
+import com.example.crawler.util.serializer.NullObjectToEmptySerializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.Data;
 import java.util.List;
@@ -14,10 +16,13 @@ public class RequestBo {
         private String orSql;
         private String orderBy;
         private List<BetweenMap> betweenMap;
-        private InMap inMap;
+        @JsonSerialize(nullsUsing = NullObjectToEmptySerializer.class)
+        private Empty inMap;
+
         private EqMap eqMap;
         private List<String> likeMap;
-        private EmptyMap map;
+        @JsonSerialize(nullsUsing = NullObjectToEmptySerializer.class)
+        private Empty map;
         @JsonProperty("file_code like")
         private List<String> file_code_like;
 }

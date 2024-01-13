@@ -4,14 +4,20 @@ import com.example.crawler.model.CrawlerLinkBo;
 import com.example.crawler.model.InnerTbody;
 import com.example.crawler.model.IptContent;
 import com.example.crawler.model.http.lingang.*;
+import com.example.crawler.model.http.request.NewAndSpecSaveBo;
+import com.example.crawler.model.http.request.Query;
+import com.example.crawler.model.http.request.Update;
 import com.example.crawler.model.http.weixin.TitleBo;
 import com.example.crawler.model.http.weixin.WeiXinReceiveBo;
 import com.example.crawler.util.HttpCrawlerUtil;
+import com.example.crawler.util.ImageUtil;
+import com.example.crawler.util.TimeDateUtil;
 import com.example.crawler.util.WebCrawlerUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,14 +28,23 @@ import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 
+@Slf4j
 @Service
 public class CrawlerService {
 
+    @Value("${lowCode.tenantId}")
+    private String tenantId;
+
+    @Value("${news.type.specialId}")
+    private String specialId;
+    @Value("${news.type.policyId}")
+    private String policyId;
+    @Value("${news.type.newsId}")
+    private String newsId;
     @Resource
     private ObjectMapper objectMapper;
     @Resource
@@ -42,7 +57,135 @@ public class CrawlerService {
     private String mediaUrl;
     @Value("${crawler.ling-gang-gov-cn.basePath}")
     private String basePath;
+    @Value("${news.isExternalId}")
+    private String isExternalId;
     final String[] reString = {"{\"pageSize\":90,\"pageNumber\":", ",\"columns\":[\"id\",\"content_title\",\"content_datetime\",\"content_hit\",\"time\",\"file_url\",\"content\",\"public_type\",\"info_name\",\"words\",\"file_code\",\"sq_code\",\"manuscripts\",\"del\"],\"tableName\":\"view_zhengcewenjian\",\"orSql\":\"\",\"orderBy\":\"content_datetime desc\",\"betweenMap\":[{\"begin\":\"2019-01-01\",\"end\":\"2100-01-01\",\"column\":\"content_datetime\"}],\"inMap\":{},\"eqMap\":{\"del\":0,\"content_display\":0},\"likeMap\":[],\"map\":{},\"file_code like\":[]}"};
+
+    /**
+     * 特色案例
+     */
+    public List<NewAndSpecSaveBo> getSpecialCase() {
+        List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
+        crawler30WeiXinSpecialCase(false).forEach(transTitleListToSpecialList(allSaveBoList));
+
+        allSaveBoList.forEach(a -> a.getUpdate().setSpecialCaseListChart(
+                ImageUtil.sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
+        return allSaveBoList;
+    }
+
+    /**
+     * 联盟动态
+     */
+    public List<NewAndSpecSaveBo> getAlliance(){
+        List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
+        crawler30WeiXinAlliance(false).forEach(transTitleListToAllianceList(allSaveBoList));
+
+        allSaveBoList.forEach(a -> a.getUpdate().setSpecialCaseListChart(
+                ImageUtil.sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
+        return allSaveBoList;
+    }
+
+    public List<NewAndSpecSaveBo> getAllGovFiles(){
+        List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
+        try {
+            crawlerAllGovFilesWithHttpPage().forEach(transCrawlerListToFileList(allSaveBoList));
+        } catch (JsonProcessingException e) {
+            log.error("获取失败,{}",e.getMessage(),e);
+        }
+        return allSaveBoList;
+    }
+
+    /**
+     * 政策文件
+     */
+    public List<NewAndSpecSaveBo> getSomeGovFiles(){
+        List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
+        try {
+            crawlerFirstGovFilesWithHttpString(false).forEach(transCrawlerListToFileList(allSaveBoList));
+        } catch (JsonProcessingException e) {
+            log.error("获取失败,{}",e.getMessage(),e);
+        }
+        return allSaveBoList;
+    }
+
+    public List<NewAndSpecSaveBo> getAllMediaFocus(){
+        List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
+        crawlerAllMediaFocusSync().forEach(transCrawlerListToFocusList(allSaveBoList));
+        return allSaveBoList;
+    }
+
+    /**
+     * 媒体聚焦
+     */
+    public List<NewAndSpecSaveBo> getSomeMediaFocus(){
+        List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
+        crawlerFirstMediaFocusSync().forEach(transCrawlerListToFocusList(allSaveBoList));
+        return allSaveBoList;
+    }
+
+    @NotNull
+    private Consumer<TitleBo> transTitleListToAllianceList(List<NewAndSpecSaveBo> allSaveBoList) {
+        // !todo
+        // 确认是否需要填充图片
+        return a ->
+                allSaveBoList.add(NewAndSpecSaveBo.builder()
+                        .query(getQuery())
+                        .update(Update.builder()
+                                .newsType(newsId)
+                                .externalInfoSourceFlag(isExternalId)
+                                .newsSrc("滴水湖金融湾")
+                                .newsUrl(a.getLink())
+                                .newsTiTle(a.getTitle())
+                                .newsSrcAnnTime(a.getTime())
+                                .specialCaseListChart(a.getCover()).build()).build());
+    }
+
+    @NotNull
+    private Consumer<TitleBo> transTitleListToSpecialList(List<NewAndSpecSaveBo> allSaveBoList) {
+        // !todo
+        // 确认字段填充是否正确
+        return a ->
+                allSaveBoList.add(NewAndSpecSaveBo.builder()
+                        .query(getQuery())
+                        .update(Update.builder()
+                                .newsType(specialId)
+                                .externalInfoSourceFlag(isExternalId)
+                                .specialCaseTitle(a.getTitle())
+                                .specialCaseUrl(a.getLink())
+                                .specialCaseAnnTime(a.getTime())
+                                .specialCaseListChart(a.getCover()).build()).build());
+    }
+
+    @NotNull
+    private Consumer<CrawlerLinkBo> transCrawlerListToFileList(List<NewAndSpecSaveBo> allSaveBoList) {
+        // !todo
+        // 确认字段填充是否正确
+        return a -> allSaveBoList.add(
+                NewAndSpecSaveBo.builder()
+                        .query(getQuery())
+                        .update(Update.builder()
+                                .newsType(policyId)
+                                .policyTitle(a.getFileName())
+                                .policySrc(a.getFileLink())
+                                .policySrcAnnTime(a.getFileTime()).build()).build()
+        );
+    }
+
+    @NotNull
+    private Consumer<CrawlerLinkBo> transCrawlerListToFocusList(List<NewAndSpecSaveBo> allSaveBoList) {
+        // !todo
+        // 确认字段填充是否正确
+        return a -> allSaveBoList.add(
+                NewAndSpecSaveBo.builder()
+                        .query(getQuery())
+                        .update(Update.builder()
+                                .newsType(newsId)
+                                .newsSrc("管委会官网")
+                                .newsTiTle(a.getFileName())
+                                .newsUrl(a.getFileLink())
+                                .newsSrcAnnTime(a.getFileTime()).build()).build()
+        );
+    }
 
     /**
      * 请求获取特色案例列表
@@ -72,18 +215,22 @@ public class CrawlerService {
                             .title(a.getTitle())
                             .link(a.getLink())
                             .cover(a.getCover())
-                            .time(transTimeMillisToString(a.getSendTime())).build()));
+                            .time(TimeDateUtil.transTimeMillisToString(a.getSendTime())).build()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        Collections.reverse(titleBoList);
         return titleBoList;
     }
 
     /**
      * htmlunit形式抓取媒体聚焦首页
      */
-    public List<CrawlerLinkBo> crawlerFistMediaFocusSync() {
-        return getCrawlerLinkBoListFromDocument(webCrawlerUtil.getHtmlPageDocumentSync(mediaUrl + "index.html"));
+    public List<CrawlerLinkBo> crawlerFirstMediaFocusSync() {
+        List<CrawlerLinkBo> crawlerLinkBoList = getCrawlerLinkBoListFromDocument(
+                webCrawlerUtil.getHtmlPageDocumentSync(mediaUrl + "index.html"));
+        Collections.reverse(crawlerLinkBoList);
+        return crawlerLinkBoList;
     }
 
     /**
@@ -99,11 +246,12 @@ public class CrawlerService {
                     )
             );
         }
+        Collections.reverse(crawlerLinkBoList);
         return crawlerLinkBoList;
     }
 
     /**
-     * 请求形式抓取
+     * 请求形式抓取政策文件全部
      */
     public List<CrawlerLinkBo> crawlerAllGovFilesWithHttpPage() throws JsonProcessingException {
         List<CrawlerLinkBo> linkBoList = new ArrayList<>();
@@ -114,7 +262,7 @@ public class CrawlerService {
         LinGangReceiveBo receiveBo;
         receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
         });
-        receiveBo.getData().getList().forEach(a -> linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(transFullTime(a.getTIME())).fileLink(a.getContent()).build()));
+        receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         while (receiveBo.getData().isHasNextPage()) {
             requestBo.setPageNumber(requestBo.getPageNumber() + 1);
             try {
@@ -125,8 +273,9 @@ public class CrawlerService {
             response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
             receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
             });
-            receiveBo.getData().getList().forEach(a -> linkBoList.add(CrawlerLinkBo.builder().fileName(a.getContent_title()).fileTime(transFullTime(a.getTIME())).fileLink(a.getContent()).build()));
+            receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         }
+        Collections.reverse(linkBoList);
         return linkBoList;
     }
 
@@ -140,11 +289,12 @@ public class CrawlerService {
         receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
         });
         receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
+        Collections.reverse(linkBoList);
         return linkBoList;
     }
 
     /**
-     * String形式抓取政策文件全部页面
+     * String形式抓取政策文件全部
      */
     public List<CrawlerLinkBo> crawlerAllGovFilesWithHttpString(boolean isProxyUsing) throws JsonProcessingException {
         int pageNumber = 1;
@@ -163,6 +313,7 @@ public class CrawlerService {
             });
             receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         }
+        Collections.reverse(linkBoList);
         return linkBoList;
     }
 
@@ -172,7 +323,7 @@ public class CrawlerService {
             if (a.getDel().equals("0")) {
                 linkBoList.add(CrawlerLinkBo.builder()
                         .fileName(a.getContent_title())
-                        .fileTime(transFullTime(a.getTIME()))
+                        .fileTime(TimeDateUtil.transFullTime(a.getTIME()))
                         .fileLink(a.getContent() != null ?
                                 readIpContentFromString(a.getContent().substring(1, a.getContent().length() - 1)).getPath()
                                 : "").build());
@@ -185,14 +336,14 @@ public class CrawlerService {
                 .columns(Arrays.asList("id", "content_title", "content_datetime", "content_hit", "time", "file_url", "content", "public_type", "info_name", "words", "file_code", "sq_code", "manuscripts", "del"))
                 .tableName("view_zhengcewenjian").orSql("").orderBy("content_datetime desc")
                 .betweenMap(Collections.singletonList(BetweenMap.builder().begin("2019-01-01").end("2100-01-01").column("content_datetime").build()))
-                .inMap(new InMap()).eqMap(EqMap.builder().del(0).content_display(0).build())
-                .likeMap(new ArrayList<>()).map(new EmptyMap()).file_code_like(new ArrayList<>()).build();
+                .inMap(null).eqMap(EqMap.builder().del(0).content_display(0).build())
+                .map(null).likeMap(new ArrayList<>()).file_code_like(new ArrayList<>()).build();
     }
 
     /**
-     * htmlunit形式抓取政策文件首页
+     * htmlunit形式抓取政策文件首页，使用页面异步解析方式，时间较前两者长
      */
-    public List<CrawlerLinkBo> crawlerFirstPageWithoutBrowser() {
+    public List<CrawlerLinkBo> crawlerFirstGovFilesPageWithoutBrowser() {
         Document document = webCrawlerUtil.getHtmlPageDocumentAsync(indexUrl);
         return getCrawlerLinkBoListFromDocument(document);
     }
@@ -217,7 +368,7 @@ public class CrawlerService {
             List<WebElement> webElementList = driver.findElement(By.className("pnwlst")).findElements(By.tagName("a"));
             webElementList.forEach(a -> crawlerLinkBoList.add(CrawlerLinkBo.builder()
                     .fileLink(a.getAttribute("href"))
-                    .fileTime(transFullTime(a.findElement(By.className("time")).getText()))
+                    .fileTime(TimeDateUtil.transFullTime(a.findElement(By.className("time")).getText()))
                     .fileName(a.getText().trim().substring(10)).build()));
             nextPage.click();
             nextPage = driver.findElement(By.className("layui-laypage-next"));
@@ -231,14 +382,14 @@ public class CrawlerService {
         List<CrawlerLinkBo> crawlerLinkBoList = new ArrayList<>();
         elements.forEach(a -> crawlerLinkBoList.add(CrawlerLinkBo.builder()
                 .fileLink(a.attr("href"))
-                .fileTime(transFullTime(a.getElementsByClass("time").get(0).text()))
+                .fileTime(TimeDateUtil.transFullTime(a.getElementsByClass("time").get(0).text()))
                 .fileName(a.text().split(" ")[1]).build()));
         return crawlerLinkBoList;
     }
 
     public List<InnerTbody> crawlerTBodyList() {
         List<InnerTbody> innerTbodyList = new ArrayList<>();
-        crawlerFirstPageWithoutBrowser().forEach(a -> innerTbodyList.add(innerCrawler(a.getFileLink())));
+        crawlerFirstGovFilesPageWithoutBrowser().forEach(a -> innerTbodyList.add(innerCrawler(a.getFileLink())));
         return innerTbodyList;
     }
 
@@ -303,26 +454,7 @@ public class CrawlerService {
         return result;
     }
 
-    private String transTimeMillisToString(long sendTime) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return simpleDateFormat.format(new Date(sendTime * 1000L));
-    }
-
-    /**
-     * 2023-12-18
-     * 2023-08-28 20:36:49
-     */
-    private static String transFullTime(String time) {
-        if (time == null || time.isEmpty()){
-            return time;
-        }
-        String tm = time.trim();
-        if (tm.length() == 10){
-            return tm + " 00:00:00";
-        }
-        if (tm.length() > 19){
-            return tm.substring(0,19);
-        }
-        return tm;
+    private Query getQuery(){
+        return Query.builder().tenantId(tenantId).build();
     }
 }
