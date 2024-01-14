@@ -1,6 +1,6 @@
 package com.example.crawler.task;
 
-import com.example.crawler.service.CrawlerService;
+import com.example.crawler.service.SendService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,14 +15,14 @@ public class CrawlerTask {
     private boolean isInit;
 
     @Resource
-    private CrawlerService crawlerService;
+    private SendService sendService;
 
     /**
      * 每天23点
      */
     @Scheduled(cron = "0 0 23 * * ?")
     public void crawlerPolicyPerDay() {
-        System.out.println("爬取政策");
+        sendService.sendSomeGovFiles();
     }
 
     /**
@@ -30,7 +30,7 @@ public class CrawlerTask {
      */
     @Scheduled(cron = "0 0 22 ? * 5")
     public void crawlerAlliancePerWeek() {
-        System.out.println("爬取动态");
+        sendService.sendAlliance();
     }
 
 
@@ -39,7 +39,7 @@ public class CrawlerTask {
      */
     @Scheduled(cron = "0 0 21 ? * 5")
     public void crawlerSpecialCasePerWeek() {
-        System.out.println("爬取特色案例");
+        sendService.sendSpecialCase();
     }
 
     /**
@@ -47,13 +47,13 @@ public class CrawlerTask {
      */
     @Scheduled(cron = "0 0 0 * * * ")
     public void crawlerMediaFocusPerDay() {
-        System.out.println("爬取媒体聚焦");
+        sendService.sendSomeMediaFocus();
     }
 
     @PostConstruct
     public void initPolicyCrawler() {
         if (isInit) {
-            // TODO: Init
+            sendService.sendAllGovFiles();
         } else {
             crawlerPolicyPerDay();
         }
@@ -61,27 +61,19 @@ public class CrawlerTask {
 
     @PostConstruct
     public void initAllianceCrawler() {
-        if (isInit) {
-            // TODO: Init
-        } else {
-            crawlerAlliancePerWeek();
-        }
+        crawlerAlliancePerWeek();
     }
 
 
     @PostConstruct
     public void initSpecialCaseCrawler() {
-        if (isInit) {
-            // TODO: Init
-        } else {
-            crawlerSpecialCasePerWeek();
-        }
+        crawlerSpecialCasePerWeek();
     }
 
     @PostConstruct
     public void initMediaFocusCrawler() {
         if (isInit) {
-            // TODO: Init
+            sendService.sendAllMediaFocus();
         } else {
             crawlerMediaFocusPerDay();
         }

@@ -10,7 +10,6 @@ import com.example.crawler.model.http.request.Update;
 import com.example.crawler.model.http.weixin.TitleBo;
 import com.example.crawler.model.http.weixin.WeiXinReceiveBo;
 import com.example.crawler.util.HttpCrawlerUtil;
-import com.example.crawler.util.ImageUtil;
 import com.example.crawler.util.TimeDateUtil;
 import com.example.crawler.util.WebCrawlerUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -67,9 +66,6 @@ public class CrawlerService {
     public List<NewAndSpecSaveBo> getSpecialCase() {
         List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
         crawler30WeiXinSpecialCase(false).forEach(transTitleListToSpecialList(allSaveBoList));
-
-        allSaveBoList.forEach(a -> a.getUpdate().setSpecialCaseListChart(
-                ImageUtil.sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
         return allSaveBoList;
     }
 
@@ -79,9 +75,6 @@ public class CrawlerService {
     public List<NewAndSpecSaveBo> getAlliance(){
         List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
         crawler30WeiXinAlliance(false).forEach(transTitleListToAllianceList(allSaveBoList));
-
-        allSaveBoList.forEach(a -> a.getUpdate().setSpecialCaseListChart(
-                ImageUtil.sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
         return allSaveBoList;
     }
 
@@ -125,15 +118,13 @@ public class CrawlerService {
 
     @NotNull
     private Consumer<TitleBo> transTitleListToAllianceList(List<NewAndSpecSaveBo> allSaveBoList) {
-        // !todo
-        // 确认是否需要填充图片
         return a ->
                 allSaveBoList.add(NewAndSpecSaveBo.builder()
                         .query(getQuery())
                         .update(Update.builder()
                                 .newsType(newsId)
-                                .externalInfoSourceFlag(isExternalId)
                                 .newsSrc("滴水湖金融湾")
+                                .externalInfoSourceFlag(isExternalId)
                                 .newsUrl(a.getLink())
                                 .newsTiTle(a.getTitle())
                                 .newsSrcAnnTime(a.getTime())
@@ -142,13 +133,12 @@ public class CrawlerService {
 
     @NotNull
     private Consumer<TitleBo> transTitleListToSpecialList(List<NewAndSpecSaveBo> allSaveBoList) {
-        // !todo
-        // 确认字段填充是否正确
         return a ->
                 allSaveBoList.add(NewAndSpecSaveBo.builder()
                         .query(getQuery())
                         .update(Update.builder()
                                 .newsType(specialId)
+                                .newsSrc("滴水湖金融湾")
                                 .externalInfoSourceFlag(isExternalId)
                                 .specialCaseTitle(a.getTitle())
                                 .specialCaseUrl(a.getLink())
@@ -158,13 +148,13 @@ public class CrawlerService {
 
     @NotNull
     private Consumer<CrawlerLinkBo> transCrawlerListToFileList(List<NewAndSpecSaveBo> allSaveBoList) {
-        // !todo
-        // 确认字段填充是否正确
         return a -> allSaveBoList.add(
                 NewAndSpecSaveBo.builder()
                         .query(getQuery())
                         .update(Update.builder()
                                 .newsType(policyId)
+                                .newsSrc("临港新片区管委会")
+                                .externalInfoSourceFlag(isExternalId)
                                 .policyTitle(a.getFileName())
                                 .policySrc(a.getFileLink())
                                 .policySrcAnnTime(a.getFileTime()).build()).build()
@@ -173,14 +163,13 @@ public class CrawlerService {
 
     @NotNull
     private Consumer<CrawlerLinkBo> transCrawlerListToFocusList(List<NewAndSpecSaveBo> allSaveBoList) {
-        // !todo
-        // 确认字段填充是否正确
         return a -> allSaveBoList.add(
                 NewAndSpecSaveBo.builder()
                         .query(getQuery())
                         .update(Update.builder()
                                 .newsType(newsId)
                                 .newsSrc("管委会官网")
+                                .externalInfoSourceFlag(isExternalId)
                                 .newsTiTle(a.getFileName())
                                 .newsUrl(a.getFileLink())
                                 .newsSrcAnnTime(a.getFileTime()).build()).build()
