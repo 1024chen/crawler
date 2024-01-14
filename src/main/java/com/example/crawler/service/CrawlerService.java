@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 @Service
 public class CrawlerService {
 
-    @Value("${lowCode.tenantId}")
+    @Value("${backend.tenantId}")
     private String tenantId;
 
     @Value("${news.type.specialId}")
@@ -44,6 +44,8 @@ public class CrawlerService {
     private String policyId;
     @Value("${news.type.newsId}")
     private String newsId;
+    @Value("${news.status.unpublishedId}")
+    private String unpublished;
     @Resource
     private ObjectMapper objectMapper;
     @Resource

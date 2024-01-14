@@ -1,12 +1,19 @@
 package com.example.crawler.service;
 
+import com.example.crawler.model.http.request.ImageBo;
 import com.example.crawler.model.http.request.NewAndSpecSaveBo;
 import com.example.crawler.model.http.response.NewsResponse;
+import com.example.crawler.util.HttpUtil;
 import com.example.crawler.util.ImageUtil;
 import com.example.crawler.util.TimeDateUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,35 +23,39 @@ import java.util.List;
 public class SendService {
     @Resource
     private CrawlerService crawlerService;
+    @Resource
+    private ObjectMapper objectMapper;
+    @Value("${backend.location}")
+    private String location;
 
-    public boolean sendSpecialCase() {
+    public void sendSpecialCase() {
         NewsResponse response = getLastSpecialCase();
         if (response == null) {
             log.error("获取特色案例历史数据失败！");
-            return false;
+            return;
         }
         if (response.getIsDeleted().equals("1") && response.getSpecialCaseAnnTime() == null) {
-            return updateInfo(crawlerService.getSpecialCase());
+            updateInfo(crawlerService.getSpecialCase());
         } else {
-            return updateInfo(filterSpecialCase(response.getSpecialCaseAnnTime(),crawlerService.getSpecialCase()));
+            updateInfo(filterSpecialCase(response.getSpecialCaseAnnTime(),crawlerService.getSpecialCase()));
         }
     }
 
-    public boolean sendAlliance() {
+    public void sendAlliance() {
         NewsResponse response = getLastAlliance();
         if (response == null) {
             log.error("获取联盟动态历史数据失败！");
-            return false;
+            return;
         }
         if (response.getIsDeleted().equals("1") && response.getNewsSrcAnnTime() == null) {
-            return updateInfo(crawlerService.getAlliance());
+            updateInfo(crawlerService.getAlliance());
         } else {
-            return updateInfo(filterAlliance(response.getNewsSrcAnnTime(),crawlerService.getAlliance()));
+            updateInfo(filterAlliance(response.getNewsSrcAnnTime(),crawlerService.getAlliance()));
         }
     }
 
-    public boolean sendAllGovFiles() {
-        return updateInfo(crawlerService.getAllGovFiles());
+    public void sendAllGovFiles() {
+        updateInfo(crawlerService.getAllGovFiles());
     }
 
     public void sendSomeGovFiles() {
@@ -54,63 +65,83 @@ public class SendService {
             return;
         }
         if (response.getIsDeleted().equals("1") && response.getNewsSrcAnnTime() == null) {
-            crawlerService.getSomeGovFiles();
+            updateInfo(crawlerService.getSomeGovFiles());
         } else {
-            filterFiles(response.getPolicySrcAnnTime(), crawlerService.getSomeGovFiles());
+            updateInfo(filterFiles(response.getPolicySrcAnnTime(), crawlerService.getSomeGovFiles()));
         }
     }
 
-    public boolean sendAllMediaFocus() {
-        return updateInfo(crawlerService.getAllMediaFocus());
+    public void sendAllMediaFocus() {
+        updateInfo(crawlerService.getAllMediaFocus());
     }
 
-    public boolean sendSomeMediaFocus() {
-        NewsResponse response = getLastPolicy();
+    public void sendSomeMediaFocus() {
+        NewsResponse response = getLastMediaFocus();
         if (response == null) {
             log.error("获取媒体聚焦历史数据失败！");
-            return false;
+            return;
         }
         if (response.getIsDeleted().equals("1") && response.getNewsSrcAnnTime() == null) {
-            return updateInfo(crawlerService.getSomeMediaFocus());
+            updateInfo(crawlerService.getSomeMediaFocus());
         } else {
-            return updateInfo(filterFocus(response.getNewsSrcAnnTime(),crawlerService.getSomeMediaFocus()));
+            updateInfo(filterFocus(response.getNewsSrcAnnTime(),crawlerService.getSomeMediaFocus()));
         }
     }
 
-    private boolean updateInfo(List<NewAndSpecSaveBo> specialCase) {
-        // !todo
-        // 保存数据到lowBCode
-        return false;
+    private void updateInfo(List<NewAndSpecSaveBo> data) {
+        String url = location + "/updateInfoBatch";
+        try {
+            HttpUtil.post(url,objectMapper.writeValueAsString(data));
+        } catch (JsonProcessingException e) {
+            log.error("数据保存失败,{}",e.getMessage(),e);
+        }
     }
 
     private NewsResponse getLastPolicy() {
-        // !todo
-        // 获取数据
-        return new NewsResponse();
+        return getNewsResponseFromBackend(location + "/getLastPolicy");
     }
 
     private NewsResponse getLastAlliance() {
-        // !todo
-        // 获取数据
-        return new NewsResponse();
+        return getNewsResponseFromBackend(location + "/getLastAlliance");
     }
 
     private NewsResponse getLastSpecialCase() {
-        // !todo
-        // 获取数据
-        return new NewsResponse();
+        return getNewsResponseFromBackend(location + "/getLastSpecialCase");
     }
 
     private NewsResponse getLastMediaFocus() {
-        // !todo
-        // 获取数据
-        return new NewsResponse();
+        return getNewsResponseFromBackend(location + "/getLastMediaFocus");
+    }
+
+    public String sendImageToLowCode(String coverUrl){
+        String url = location + "/uploadImage";
+        String result = "";
+        ImageBo imageBo = ImageUtil.getCoverImage(coverUrl);
+        try {
+            result = HttpUtil.post(url,objectMapper.writeValueAsString(imageBo));
+        } catch (JsonProcessingException e) {
+            log.error("图片对象转换失败,{}",e.getMessage(),e);
+        }
+        return result;
+    }
+
+    @Nullable
+    private NewsResponse getNewsResponseFromBackend(String url) {
+        String response = HttpUtil.get(url);
+        NewsResponse newsResponse = null;
+        try {
+            newsResponse = objectMapper.readValue(response, new TypeReference<>() {
+            });
+        } catch (JsonProcessingException e) {
+            log.error("数据转换失败{}",e.getMessage(),e);
+        }
+        return newsResponse;
     }
 
     private List<NewAndSpecSaveBo> filterSpecialCase(String oldTime, List<NewAndSpecSaveBo> specialCase) {
         List<NewAndSpecSaveBo> filteredList = getFilteredList(oldTime, specialCase,1);
         filteredList.forEach(a -> a.getUpdate().setSpecialCaseListChart(
-                ImageUtil.sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
+                sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
         return filteredList;
     }
 
@@ -133,7 +164,7 @@ public class SendService {
     private List<NewAndSpecSaveBo> filterAlliance(String oldTime, List<NewAndSpecSaveBo> alliance) {
         var filteredList = getFilteredList(oldTime, alliance,2);
         filteredList.forEach(a -> a.getUpdate().setSpecialCaseListChart(
-                ImageUtil.sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
+                sendImageToLowCode(a.getUpdate().getSpecialCaseListChart())));
         return filteredList;
     }
 

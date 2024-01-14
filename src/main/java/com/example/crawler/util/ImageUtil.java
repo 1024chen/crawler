@@ -15,13 +15,6 @@ import java.util.Base64;
 //@Service
 public class ImageUtil {
 
-    // !todo
-    //  把imageBo.getEncoded发送到接收端并返回路径参数
-    public static String sendImageToLowCode(String coverUrl){
-        ImageBo imageBo = getCoverImage(coverUrl);
-        return imageBo.getEncoded();
-    }
-
     public static ImageBo getCoverImage(String coverUrl) {
         return ImageBo.builder()
                 .fileName(getFileNameFromCover(coverUrl))

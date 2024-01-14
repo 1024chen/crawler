@@ -1,5 +1,6 @@
-lowCode:
+backend:
   tenantId: BW61
+  location: https://example.com/name/api
 
 photo:
   url: ./static/img
