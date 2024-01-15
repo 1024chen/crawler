@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 @SpringBootTest
+@ActiveProfiles("dev")
 class WebCrawlerUtilTest {
     @Resource
     private ObjectMapper objectMapper;
