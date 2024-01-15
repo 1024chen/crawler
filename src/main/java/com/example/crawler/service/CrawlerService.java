@@ -127,6 +127,7 @@ public class CrawlerService {
                                 .newsType(newsId)
                                 .newsSrc("滴水湖金融湾")
                                 .externalInfoSourceFlag(isExternalId)
+                                .infRgsnBookStatus(unpublished)
                                 .newsUrl(a.getLink())
                                 .newsTiTle(a.getTitle())
                                 .newsSrcAnnTime(a.getTime())
@@ -142,6 +143,7 @@ public class CrawlerService {
                                 .newsType(specialId)
                                 .newsSrc("滴水湖金融湾")
                                 .externalInfoSourceFlag(isExternalId)
+                                .infRgsnBookStatus(unpublished)
                                 .specialCaseTitle(a.getTitle())
                                 .specialCaseUrl(a.getLink())
                                 .specialCaseAnnTime(a.getTime())
@@ -157,6 +159,7 @@ public class CrawlerService {
                                 .newsType(policyId)
                                 .newsSrc("临港新片区管委会")
                                 .externalInfoSourceFlag(isExternalId)
+                                .infRgsnBookStatus(unpublished)
                                 .policyTitle(a.getFileName())
                                 .policySrc(a.getFileLink())
                                 .policySrcAnnTime(a.getFileTime()).build()).build()
@@ -172,6 +175,7 @@ public class CrawlerService {
                                 .newsType(newsId)
                                 .newsSrc("管委会官网")
                                 .externalInfoSourceFlag(isExternalId)
+                                .infRgsnBookStatus(unpublished)
                                 .newsTiTle(a.getFileName())
                                 .newsUrl(a.getFileLink())
                                 .newsSrcAnnTime(a.getFileTime()).build()).build()
@@ -199,7 +203,7 @@ public class CrawlerService {
         List<TitleBo> titleBoList = new ArrayList<>();
         WeiXinReceiveBo weiXinReceiveBo;
         try {
-            weiXinReceiveBo = objectMapper.readValue(response, new TypeReference<WeiXinReceiveBo>() {
+            weiXinReceiveBo = objectMapper.readValue(response, new TypeReference<>() {
             });
             weiXinReceiveBo.getAppMsgList().forEach(a -> titleBoList.add(
                     TitleBo.builder()
@@ -251,7 +255,7 @@ public class CrawlerService {
         jsonBody = objectMapper.writeValueAsString(requestBo);
         String response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
         LinGangReceiveBo receiveBo;
-        receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
+        receiveBo = objectMapper.readValue(response, new TypeReference<>() {
         });
         receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         while (receiveBo.getData().isHasNextPage()) {
@@ -262,7 +266,7 @@ public class CrawlerService {
                 throw new RuntimeException(e);
             }
             response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
-            receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
+            receiveBo = objectMapper.readValue(response, new TypeReference<>() {
             });
             receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         }
@@ -277,7 +281,7 @@ public class CrawlerService {
         List<CrawlerLinkBo> linkBoList = new ArrayList<>();
         String response = httpCrawlerUtil.linGangPageCrawler(reString[0] + 1 + reString[1], isProxyUsing);
         LinGangReceiveBo receiveBo;
-        receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
+        receiveBo = objectMapper.readValue(response, new TypeReference<>() {
         });
         receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         Collections.reverse(linkBoList);
@@ -293,14 +297,14 @@ public class CrawlerService {
         String jsonBody = reString[0] + pageNumber + reString[1];
         String response = httpCrawlerUtil.linGangPageCrawler(jsonBody, isProxyUsing);
         LinGangReceiveBo receiveBo;
-        receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
+        receiveBo = objectMapper.readValue(response, new TypeReference<>() {
         });
         receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         while (receiveBo.getData().isHasNextPage()) {
             pageNumber += 1;
             jsonBody = reString[0] + pageNumber + reString[1];
             response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
-            receiveBo = objectMapper.readValue(response, new TypeReference<LinGangReceiveBo>() {
+            receiveBo = objectMapper.readValue(response, new TypeReference<>() {
             });
             receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
         }
@@ -436,7 +440,7 @@ public class CrawlerService {
     private IptContent readIpContentFromString(String content) {
         IptContent result;
         try {
-            result = objectMapper.readValue(content, new TypeReference<IptContent>() {
+            result = objectMapper.readValue(content, new TypeReference<>() {
             });
             result.setPath(basePath + result.getPath());
         } catch (JsonProcessingException e) {
