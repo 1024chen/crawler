@@ -3,8 +3,8 @@ package com.example.crawler.model.http.response;
 import lombok.Data;
 
 @Data
-public class OuterBo {
+public class OuterBo<T> {
     private boolean success;
     private String traceId;
-    private NewsResponse data;
+    private T data;
 }

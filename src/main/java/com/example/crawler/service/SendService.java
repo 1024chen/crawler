@@ -3,6 +3,8 @@ package com.example.crawler.service;
 import com.example.crawler.model.http.request.ImageBo;
 import com.example.crawler.model.http.request.NewAndSpecSaveBo;
 import com.example.crawler.model.http.response.NewsResponse;
+import com.example.crawler.model.http.response.OuterBo;
+import com.example.crawler.model.http.response.ResponseBo;
 import com.example.crawler.util.HttpUtil;
 import com.example.crawler.util.ImageUtil;
 import com.example.crawler.util.TimeDateUtil;
@@ -118,7 +120,9 @@ public class SendService {
         String result = "";
         ImageBo imageBo = ImageUtil.getCoverImage(coverUrl);
         try {
-            result = HttpUtil.post(url,objectMapper.writeValueAsString(imageBo));
+            String response = HttpUtil.post(url,objectMapper.writeValueAsString(imageBo));
+            result = objectMapper.readValue(response, new TypeReference<OuterBo<ResponseBo>>() {
+            }).getData().getResult();
         } catch (JsonProcessingException e) {
             log.error("图片对象转换失败,{}",e.getMessage(),e);
         }
@@ -130,8 +134,8 @@ public class SendService {
         String response = HttpUtil.get(url);
         NewsResponse newsResponse = null;
         try {
-            newsResponse = objectMapper.readValue(response, new TypeReference<>() {
-            });
+            newsResponse = objectMapper.readValue(response, new TypeReference<OuterBo<NewsResponse>>() {
+            }).getData();
         } catch (JsonProcessingException e) {
             log.error("数据转换失败{}",e.getMessage(),e);
         }
