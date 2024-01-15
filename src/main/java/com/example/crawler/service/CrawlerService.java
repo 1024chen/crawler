@@ -37,7 +37,6 @@ public class CrawlerService {
 
     @Value("${backend.tenantId}")
     private String tenantId;
-
     @Value("${news.type.specialId}")
     private String specialId;
     @Value("${news.type.policyId}")
@@ -67,7 +66,7 @@ public class CrawlerService {
      */
     public List<NewAndSpecSaveBo> getSpecialCase() {
         List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
-        crawler30WeiXinSpecialCase(false).forEach(transTitleListToSpecialList(allSaveBoList));
+        crawler30WeiXinSpecialCase().forEach(transTitleListToSpecialList(allSaveBoList));
         return allSaveBoList;
     }
 
@@ -76,7 +75,7 @@ public class CrawlerService {
      */
     public List<NewAndSpecSaveBo> getAlliance(){
         List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
-        crawler30WeiXinAlliance(false).forEach(transTitleListToAllianceList(allSaveBoList));
+        crawler30WeiXinAlliance().forEach(transTitleListToAllianceList(allSaveBoList));
         return allSaveBoList;
     }
 
@@ -96,7 +95,7 @@ public class CrawlerService {
     public List<NewAndSpecSaveBo> getSomeGovFiles(){
         List<NewAndSpecSaveBo> allSaveBoList = new ArrayList<>();
         try {
-            crawlerFirstGovFilesWithHttpString(false).forEach(transCrawlerListToFileList(allSaveBoList));
+            crawlerFirstGovFilesWithHttpString().forEach(transCrawlerListToFileList(allSaveBoList));
         } catch (JsonProcessingException e) {
             log.error("获取失败,{}",e.getMessage(),e);
         }
@@ -185,16 +184,16 @@ public class CrawlerService {
     /**
      * 请求获取特色案例列表
      */
-    public List<TitleBo> crawler30WeiXinSpecialCase(boolean isProxyUsing) {
-        String response = httpCrawlerUtil.mpWeiXinSpecialCaseCrawler(isProxyUsing);
+    public List<TitleBo> crawler30WeiXinSpecialCase() {
+        String response = httpCrawlerUtil.mpWeiXinSpecialCaseCrawler();
         return transToTitleBoList(response);
     }
 
     /**
      * 请求获取联盟动态列表
      */
-    public List<TitleBo> crawler30WeiXinAlliance(boolean isProxyUsing) {
-        String response = httpCrawlerUtil.mpWeiXinAllianceCrawler(isProxyUsing);
+    public List<TitleBo> crawler30WeiXinAlliance() {
+        String response = httpCrawlerUtil.mpWeiXinAllianceCrawler();
         return transToTitleBoList(response);
     }
 
@@ -253,7 +252,7 @@ public class CrawlerService {
         RequestBo requestBo = getRequestBo();
         String jsonBody;
         jsonBody = objectMapper.writeValueAsString(requestBo);
-        String response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
+        String response = httpCrawlerUtil.linGangPageCrawler(jsonBody);
         LinGangReceiveBo receiveBo;
         receiveBo = objectMapper.readValue(response, new TypeReference<>() {
         });
@@ -265,7 +264,7 @@ public class CrawlerService {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-            response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
+            response = httpCrawlerUtil.linGangPageCrawler(jsonBody);
             receiveBo = objectMapper.readValue(response, new TypeReference<>() {
             });
             receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));
@@ -277,9 +276,9 @@ public class CrawlerService {
     /**
      * String形式抓取政策文件首页
      */
-    public List<CrawlerLinkBo> crawlerFirstGovFilesWithHttpString(boolean isProxyUsing) throws JsonProcessingException {
+    public List<CrawlerLinkBo> crawlerFirstGovFilesWithHttpString() throws JsonProcessingException {
         List<CrawlerLinkBo> linkBoList = new ArrayList<>();
-        String response = httpCrawlerUtil.linGangPageCrawler(reString[0] + 1 + reString[1], isProxyUsing);
+        String response = httpCrawlerUtil.linGangPageCrawler(reString[0] + 1 + reString[1]);
         LinGangReceiveBo receiveBo;
         receiveBo = objectMapper.readValue(response, new TypeReference<>() {
         });
@@ -291,11 +290,11 @@ public class CrawlerService {
     /**
      * String形式抓取政策文件全部
      */
-    public List<CrawlerLinkBo> crawlerAllGovFilesWithHttpString(boolean isProxyUsing) throws JsonProcessingException {
+    public List<CrawlerLinkBo> crawlerAllGovFilesWithHttpString() throws JsonProcessingException {
         int pageNumber = 1;
         List<CrawlerLinkBo> linkBoList = new ArrayList<>();
         String jsonBody = reString[0] + pageNumber + reString[1];
-        String response = httpCrawlerUtil.linGangPageCrawler(jsonBody, isProxyUsing);
+        String response = httpCrawlerUtil.linGangPageCrawler(jsonBody);
         LinGangReceiveBo receiveBo;
         receiveBo = objectMapper.readValue(response, new TypeReference<>() {
         });
@@ -303,7 +302,7 @@ public class CrawlerService {
         while (receiveBo.getData().isHasNextPage()) {
             pageNumber += 1;
             jsonBody = reString[0] + pageNumber + reString[1];
-            response = httpCrawlerUtil.linGangPageCrawler(jsonBody, false);
+            response = httpCrawlerUtil.linGangPageCrawler(jsonBody);
             receiveBo = objectMapper.readValue(response, new TypeReference<>() {
             });
             receiveBo.getData().getList().forEach(getContentDataConsumer(linkBoList));

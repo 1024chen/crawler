@@ -14,21 +14,22 @@ import java.util.Objects;
 @Service
 @Slf4j
 public class HttpCrawlerUtil {
-
+    @Value("${crawler.proxy.isProxyUsing}")
+    private boolean isProxyUsing;
     @Value("${crawler.proxy.host}")
     private String proxyHost;
     @Value("${crawler.proxy.port}")
     private int proxyPort;
 
     @NotNull
-    private OkHttpClient getClient(boolean isProxyUsing) {
+    private OkHttpClient getClient() {
         return isProxyUsing ?
                 new OkHttpClient.Builder().proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort))).build()
                 : new OkHttpClient().newBuilder().build();
     }
 
-    public String linGangPageCrawler(String jsonBody, boolean isProxyUsing) {
-        OkHttpClient client = getClient(isProxyUsing);
+    public String linGangPageCrawler(String jsonBody) {
+        OkHttpClient client = getClient();
         MediaType mediaType = MediaType.parse(" application/json;charset=UTF-8");
         RequestBody body = RequestBody.create(mediaType, jsonBody);
         Request request = getLinGangPageRequest(body);
@@ -77,8 +78,8 @@ public class HttpCrawlerUtil {
     /**
      * 特色案例爬取
      */
-    public String mpWeiXinSpecialCaseCrawler(boolean isProxyUsing) {
-        OkHttpClient client = getClient(isProxyUsing);
+    public String mpWeiXinSpecialCaseCrawler() {
+        OkHttpClient client = getClient();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
         Request request = getWeiXinSpecialCaseRequest(body);
@@ -88,8 +89,8 @@ public class HttpCrawlerUtil {
     /**
      * 联盟动态爬取
      */
-    public String mpWeiXinAllianceCrawler(boolean isProxyUsing){
-        OkHttpClient client = getClient(isProxyUsing);
+    public String mpWeiXinAllianceCrawler(){
+        OkHttpClient client = getClient();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "");
         Request request = getWeiXinAllianceRequest(body);

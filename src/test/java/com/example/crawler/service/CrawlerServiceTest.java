@@ -60,7 +60,7 @@ class CrawlerServiceTest {
      */
     @Test
     void crawlerFirstGovFilesWithHttpString() throws JsonProcessingException {
-        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstGovFilesWithHttpString(false);
+        List<CrawlerLinkBo> crawlerLinkBoList = crawlerService.crawlerFirstGovFilesWithHttpString();
         Assertions.assertNotNull(crawlerLinkBoList);
         System.out.println(crawlerLinkBoList);
     }
@@ -114,13 +114,13 @@ class CrawlerServiceTest {
 
     @Test
     void crawler30WeiXinSpecialCase(){
-        System.out.println(crawlerService.crawler30WeiXinSpecialCase(false));
+        System.out.println(crawlerService.crawler30WeiXinSpecialCase());
     }
 
 
     @Test
     void crawler30WeiXinAlliance(){
-        System.out.println(crawlerService.crawler30WeiXinAlliance(false));
+        System.out.println(crawlerService.crawler30WeiXinAlliance());
     }
 
     @Test
@@ -130,6 +130,6 @@ class CrawlerServiceTest {
 
     @Test
     void crawlerAllGovFilesWithHttpString() throws JsonProcessingException {
-        System.out.println(crawlerService.crawlerAllGovFilesWithHttpString(false));
+        System.out.println(crawlerService.crawlerAllGovFilesWithHttpString());
     }
 }
