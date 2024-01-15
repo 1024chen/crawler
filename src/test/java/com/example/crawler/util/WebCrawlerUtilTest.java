@@ -68,7 +68,7 @@ class WebCrawlerUtilTest {
 
     @Test
     void getWebClient() throws IOException {
-        try (final WebClient webClient = webCrawlerUtil.getWebClient(false)) {
+        try (final WebClient webClient = webCrawlerUtil.getWebClient()) {
             String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
             final HtmlPage page = webClient.getPage(url);
             DomNodeList<HtmlElement> elements = page.getElementById("pages")
@@ -81,7 +81,7 @@ class WebCrawlerUtilTest {
     void firefoxDriverPropertySet() {
         webCrawlerUtil.firefoxDriverPropertySet();
         String url = "https://www.lingang.gov.cn/html/website/lg/index/government/file/index.html";
-        WebDriver driver = new FirefoxDriver(webCrawlerUtil.getFirefoxOptions(false));
+        WebDriver driver = new FirefoxDriver(webCrawlerUtil.getFirefoxOptions());
         driver.get(url);
         String title = driver.getTitle();
         System.out.printf(title);

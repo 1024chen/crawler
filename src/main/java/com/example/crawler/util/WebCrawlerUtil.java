@@ -39,6 +39,8 @@ public class WebCrawlerUtil {
      */
     private int waitForBackgroundJavaScript = 20000;
 
+    @Value("${crawler.proxy.isProxyUsing}")
+    private boolean isProxyUsing;
     @Value("${crawler.proxy.host}")
     private String proxyHost;
     @Value("${crawler.proxy.port}")
@@ -77,18 +79,11 @@ public class WebCrawlerUtil {
      * 获取页面文档(异步JS执行)
      */
     public String getHtmlPageResponseAsync(String url) {
-        return getPage(url, false).asXml();
+        return getPage(url).asXml();
     }
 
-    /**
-     * 获取页面文档(异步JS执行+代理)
-     */
-    public String getHtmlPageResponseAsyncUsingProxy(String url) {
-        return getPage(url, true).asXml();
-    }
-
-    public HtmlPage getPage(String url, boolean isProxyUsing) {
-        final WebClient webClient = getWebClient(isProxyUsing);
+    public HtmlPage getPage(String url) {
+        final WebClient webClient = getWebClient();
         HtmlPage page = null;
         try {
             page = webClient.getPage(url);
@@ -101,7 +96,7 @@ public class WebCrawlerUtil {
         return page;
     }
 
-    public WebClient getWebClient(boolean isProxyUsing) {
+    public WebClient getWebClient() {
         final WebClient webClient = isProxyUsing ? new WebClient(BrowserVersion.CHROME, proxyHost, proxyPort)
                 : new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
@@ -123,22 +118,11 @@ public class WebCrawlerUtil {
     }
 
     /**
-     * 获取页面文档Document对象(同步+代理)
-     */
-    public Document getHtmlPageDocumentSyncUsingProxy(String url) {
-        try {
-            return Jsoup.connect(url).proxy(proxyHost, proxyPort).get();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
      * 获取页面文档Document对象(同步直连)
      */
     public Document getHtmlPageDocumentSync(String url) {
         try {
-            return Jsoup.connect(url).get();
+            return isProxyUsing ? Jsoup.connect(url).proxy(proxyHost, proxyPort).get() : Jsoup.connect(url).get();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -156,41 +140,41 @@ public class WebCrawlerUtil {
         System.setProperty("webdriver.chrome.whitelistedIps", "");
     }
 
-    public WebDriver getDriver(String driver,boolean isProxyUsing) {
+    public WebDriver getDriver(String driver) {
         if (driver.equals("chrome")) {
-            return getChromeDriver(isProxyUsing);
+            return getChromeDriver();
         } else if (driver.equals("firefox")) {
-            return getFirefoxDriver(isProxyUsing);
+            return getFirefoxDriver();
         } else {
             return getRemoteDriver();
         }
     }
 
-    private WebDriver getFirefoxDriver(boolean isProxyUsing) {
+    private WebDriver getFirefoxDriver() {
         firefoxDriverPropertySet();
-        return new FirefoxDriver(getFirefoxOptions(isProxyUsing));
+        return new FirefoxDriver(getFirefoxOptions());
     }
 
-    private WebDriver getChromeDriver(boolean isProxyUsing) {
+    private WebDriver getChromeDriver() {
         chromeDriverPropertySet();
-        return new ChromeDriver(getChromeOptions(isProxyUsing));
+        return new ChromeDriver(getChromeOptions());
     }
 
-    private WebDriver getRemoteDriver(){
+    private WebDriver getRemoteDriver() {
 //        chromeDriverPropertySet();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("chrome");
         desiredCapabilities.setPlatform(Platform.LINUX);
         URI uri = URI.create("http://host:4444/wd/hub");
         try {
-            return new RemoteWebDriver(uri.toURL(),desiredCapabilities);
+            return new RemoteWebDriver(uri.toURL(), desiredCapabilities);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    public ChromeOptions getChromeOptions(boolean isProxyUsing) {
+    public ChromeOptions getChromeOptions() {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--disable-gpu");
@@ -199,23 +183,23 @@ public class WebCrawlerUtil {
         chromeOptions.addArguments("lang=zh_CN.UTF-8");
         chromeOptions.addArguments("window-size=1920x1080");
         chromeOptions.addArguments("--remote-allow-origins=*");
-        if (isProxyUsing){
+        if (isProxyUsing) {
             chromeOptions.setProxy(getBrowserProxy());
         }
         return chromeOptions;
     }
 
-    public FirefoxOptions getFirefoxOptions(boolean isProxyUsing) {
+    public FirefoxOptions getFirefoxOptions() {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.addArguments("--headless");
         firefoxOptions.addArguments("--disable-gpu");
-        if (isProxyUsing){
+        if (isProxyUsing) {
             firefoxOptions.setProxy(getBrowserProxy());
         }
         return firefoxOptions;
     }
 
-    private Proxy getBrowserProxy(){
+    private Proxy getBrowserProxy() {
         String proxy = proxyHost + ":" + proxyPort;
         return new Proxy().setHttpProxy(proxy).setSslProxy(proxy);
     }

@@ -99,17 +99,17 @@ class CrawlerServiceTest {
 
     @Test
     void crawlerAllPageWithChrome(){
-        crawlerService.crawlerAllPageWithBrowser("chrome",false).forEach(System.out::println);
+        crawlerService.crawlerAllPageWithBrowser("chrome").forEach(System.out::println);
     }
 
     @Test
     void crawlerAllPageWithFirefox(){
-        crawlerService.crawlerAllPageWithBrowser("firefox",false).forEach(System.out::println);
+        crawlerService.crawlerAllPageWithBrowser("firefox").forEach(System.out::println);
     }
 
     @Test
     void crawlerAllPageWithRemote(){
-        crawlerService.crawlerAllPageWithBrowser("remote",false).forEach(System.out::println);
+        crawlerService.crawlerAllPageWithBrowser("remote").forEach(System.out::println);
     }
 
     @Test

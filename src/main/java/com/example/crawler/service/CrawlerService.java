@@ -346,8 +346,8 @@ public class CrawlerService {
     /**
      * 浏览器形式抓取
      */
-    public List<CrawlerLinkBo> crawlerAllPageWithBrowser(String driverName, boolean isProxyUsing) {
-        WebDriver driver = webCrawlerUtil.getDriver(driverName, isProxyUsing);
+    public List<CrawlerLinkBo> crawlerAllPageWithBrowser(String driverName) {
+        WebDriver driver = webCrawlerUtil.getDriver(driverName);
         assert driver != null;
         return crawlerLinkBoList(driver);
     }
