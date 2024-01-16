@@ -26,6 +26,8 @@ public class SendService {
     @Resource
     private CrawlerService crawlerService;
     @Resource
+    private HttpUtil httpUtil;
+    @Resource
     private ObjectMapper objectMapper;
     @Value("${backend.location}")
     private String location;
@@ -93,7 +95,7 @@ public class SendService {
     private void updateInfo(List<NewAndSpecSaveBo> data) {
         String url = location + "/updateInfoBatch";
         try {
-            HttpUtil.post(url,objectMapper.writeValueAsString(data));
+            httpUtil.post(url,objectMapper.writeValueAsString(data));
         } catch (JsonProcessingException e) {
             log.error("数据保存失败,{}",e.getMessage(),e);
         }
@@ -120,7 +122,7 @@ public class SendService {
         String result = "";
         ImageBo imageBo = ImageUtil.getCoverImage(coverUrl);
         try {
-            String response = HttpUtil.post(url,objectMapper.writeValueAsString(imageBo));
+            String response = httpUtil.post(url,objectMapper.writeValueAsString(imageBo));
             result = objectMapper.readValue(response, new TypeReference<OuterBo<ResponseBo>>() {
             }).getData().getResult();
         } catch (JsonProcessingException e) {
@@ -131,7 +133,7 @@ public class SendService {
 
     @Nullable
     private NewsResponse getNewsResponseFromBackend(String url) {
-        String response = HttpUtil.get(url);
+        String response = httpUtil.get(url);
         NewsResponse newsResponse = null;
         try {
             newsResponse = objectMapper.readValue(response, new TypeReference<OuterBo<NewsResponse>>() {
