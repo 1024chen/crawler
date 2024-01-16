@@ -18,9 +18,9 @@ public class HttpUtil {
     @NotNull
     private OkHttpClient getClient() {
         return new OkHttpClient().newBuilder()
-                .connectTimeout(20,TimeUnit.SECONDS)
-                .readTimeout(20,TimeUnit.SECONDS)
-                .callTimeout(20,TimeUnit.SECONDS).build();
+                .connectTimeout(50,TimeUnit.SECONDS)
+                .readTimeout(50,TimeUnit.SECONDS)
+                .callTimeout(50,TimeUnit.SECONDS).build();
     }
 
     public String get(String url) {
