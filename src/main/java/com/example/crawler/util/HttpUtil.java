@@ -15,26 +15,12 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class HttpUtil {
 
-    @Value("${crawler.proxy.isProxyUsing}")
-    private boolean isProxyUsing;
-    @Value("${crawler.proxy.host}")
-    private String proxyHost;
-    @Value("${crawler.proxy.port}")
-    private int proxyPort;
-
     @NotNull
     private OkHttpClient getClient() {
-        return isProxyUsing ?
-                new OkHttpClient.Builder()
-                        .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
-                        .callTimeout(10, TimeUnit.SECONDS)
-                        .connectTimeout(10, TimeUnit.SECONDS)
-                        .readTimeout(10, TimeUnit.SECONDS).build()
-                : new OkHttpClient().newBuilder()
-                .callTimeout(10, TimeUnit.SECONDS)
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .build();
+        return new OkHttpClient().newBuilder()
+                .connectTimeout(20,TimeUnit.SECONDS)
+                .readTimeout(20,TimeUnit.SECONDS)
+                .callTimeout(20,TimeUnit.SECONDS).build();
     }
 
     public String get(String url) {
